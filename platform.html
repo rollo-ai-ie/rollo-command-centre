@@ -1060,7 +1060,7 @@ const ENGINEERS=[
 const ENG_MAP={};
 ENGINEERS.forEach(e=>{ENG_MAP[e.name]=e;});
 
-const JOB_STATUSES=['Quote','Work Order','In Progress','Completed','Invoiced'];
+const JOB_STATUSES=['Quote','Work Order','In Progress','Completed','Unsuccessful','Invoiced'];
 
 const JOB_TYPES=['No Heat/No Hot Water','Boiler Service','Boiler Repair','Radiator Issue','Tap Issue','Shower Issue','General Plumbing','Electrical','Gas Leak','CVRT Check','Drain Blockage','Annual Service','Bathroom Fit','Underfloor Heating'];
 
@@ -4732,7 +4732,7 @@ function renderSettings(){
   <div class="page-header">
     <div class="page-header-left"><div class="page-title"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg> Settings</div></div>
   </div>
-  ${tabsHTML([{id:'company',label:'<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M3 15h18M9 3v18M15 3v18"/></svg> Company'},{id:'staff',label:'<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg> Staff'},{id:'automation',label:'<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg> Automation'},{id:'integrations',label:'<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6L6 18"/><path d="M7 17l-5 5"/><path d="M17 7l5-5"/><path d="M4 4l4 4m8 0l4-4m-4 12l4 4m-12-4l-4 4"/></svg> Integrations'},{id:'sms',label:'<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="5" y="2" width="14" height="20" rx="2"/><line x1="12" y1="18" x2="12.01" y2="18"/></svg> SMS'},{id:'system',label:'<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg> System'}],'settings')}
+  ${tabsHTML([{id:'company',label:'<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M3 15h18M9 3v18M15 3v18"/></svg> Company'},{id:'staff',label:'<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg> Staff'},{id:'materials',label:'<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/></svg> Materials'},{id:'automation',label:'<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg> Automation'},{id:'integrations',label:'<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6L6 18"/><path d="M7 17l-5 5"/><path d="M17 7l5-5"/><path d="M4 4l4 4m8 0l4-4m-4 12l4 4m-12-4l-4 4"/></svg> Integrations'},{id:'sms',label:'<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="5" y="2" width="14" height="20" rx="2"/><line x1="12" y1="18" x2="12.01" y2="18"/></svg> SMS'},{id:'system',label:'<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg> System'}],'settings')}
   <div class="tab-content active" data-tab="company" data-tab-group="settings">
     <div class="card" style="max-width:580px">
       <div class="card-header"><span class="card-title">Company Details</span></div>
@@ -4769,6 +4769,43 @@ function renderSettings(){
           </div>
         </div>`).join('')}
         <button class="btn btn-primary btn-sm mt-3 mb-3" onclick="toast('New staff form — use HR section to add engineers','info')">+ Add Staff Member</button>
+      </div>
+    </div>
+  </div>
+  <div class="tab-content" data-tab="materials" data-tab-group="settings">
+    <div class="card" style="max-width:720px">
+      <div class="card-header">
+        <span class="card-title"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/></svg> Materials &amp; Services Price List</span>
+        <button class="btn btn-primary btn-sm" onclick="addMaterialItem()">+ Add Item</button>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Item Code</th><th>Name</th><th>Category</th><th>Unit Price (€)</th><th>Cost (€)</th><th>Tax</th><th></th></tr></thead>
+          <tbody id="materials-table-body">
+            ${(DB.get('materials_catalog',[
+              {id:1,code:'LAB001',name:'Labour - Standard (per hour)',cat:'Labour',price:75.00,cost:0,tax:'23%'},
+              {id:2,code:'LAB002',name:'Labour - Emergency (per hour)',cat:'Labour',price:120.00,cost:0,tax:'23%'},
+              {id:3,code:'MAT001',name:'15mm Compression Elbow',cat:'Fittings',price:3.50,cost:1.20,tax:'23%'},
+              {id:4,code:'MAT002',name:'22mm Gate Valve',cat:'Valves',price:8.95,cost:3.50,tax:'23%'},
+              {id:5,code:'MAT003',name:'Radiator Valve TRV',cat:'Heating',price:24.99,cost:9.00,tax:'23%'},
+              {id:6,code:'MAT004',name:'Flexi Hose 15mm x 300mm',cat:'Fittings',price:6.50,cost:2.10,tax:'23%'},
+              {id:7,code:'SVC001',name:'Boiler Service - Full',cat:'Service',price:120.00,cost:0,tax:'23%'},
+              {id:8,code:'SVC002',name:'Drain Unblock - Standard',cat:'Service',price:149.00,cost:0,tax:'23%'},
+              {id:9,code:'SVC003',name:'Gas Safety Certificate',cat:'Cert',price:60.00,cost:0,tax:'23%'},
+            ])).map(m=>`<tr>
+              <td style="font-family:monospace;font-size:12px">${m.code}</td>
+              <td style="font-weight:600">${m.name}</td>
+              <td><span class="badge badge-blue">${m.cat}</span></td>
+              <td>€${m.price.toFixed(2)}</td>
+              <td style="color:#64748b">€${m.cost.toFixed(2)}</td>
+              <td style="font-size:11px;color:#64748b">${m.tax}</td>
+              <td><button class="btn btn-ghost btn-xs" onclick="toast('Edit materials in the Finance section','info')">Edit</button></td>
+            </tr>`).join('')}
+          </tbody>
+        </table>
+      </div>
+      <div class="card-footer">
+        <span style="font-size:12px;color:#64748b">${DB.get('materials_catalog',[...Array(9)]).length} items in price list · Add materials to billing from the job card</span>
       </div>
     </div>
   </div>
@@ -4846,15 +4883,55 @@ function renderSettings(){
     </div>
   </div>
   <div class="tab-content" data-tab="sms" data-tab-group="settings">
-    <div class="card" style="max-width:500px">
-      <div class="card-header"><span class="card-title"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="5" y="2" width="14" height="20" rx="2"/><line x1="12" y1="18" x2="12.01" y2="18"/></svg> Twilio SMS Configuration</span>
-        <span class="badge ${integrations.twilio?.connected?'badge-green':'badge-red'}">${integrations.twilio?.connected?'Connected':'Disconnected'}</span>
+    <div style="display:flex;flex-direction:column;gap:14px;max-width:640px">
+      <div class="card">
+        <div class="card-header">
+          <span class="card-title"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="5" y="2" width="14" height="20" rx="2"/><line x1="12" y1="18" x2="12.01" y2="18"/></svg> Twilio Connection</span>
+          <span class="badge ${integrations.twilio?.connected?'badge-green':'badge-red'}">${integrations.twilio?.connected?'Connected':'Disconnected'}</span>
+        </div>
+        <div class="card-body">
+          <div class="form-grid-2">
+            <div class="form-group"><label class="form-label">Account SID</label><input class="form-input" id="twilio-sid" value="${integrations.twilio?.accountSid||''}"></div>
+            <div class="form-group"><label class="form-label">From Number</label><input class="form-input" id="twilio-from" value="${integrations.twilio?.fromNumber||''}"></div>
+          </div>
+          <div class="form-group"><label class="form-label">Auth Token</label><input class="form-input" id="twilio-token" type="password" placeholder="Hidden for security"></div>
+          <button class="btn btn-primary" onclick="saveTwilioConfig()">Save & Test Connection</button>
+        </div>
       </div>
-      <div class="card-body">
-        <div class="form-group"><label class="form-label">Account SID</label><input class="form-input" id="twilio-sid" value="${integrations.twilio?.accountSid||''}"></div>
-        <div class="form-group"><label class="form-label">Auth Token</label><input class="form-input" id="twilio-token" type="password" placeholder="Hidden for security"></div>
-        <div class="form-group"><label class="form-label">From Number</label><input class="form-input" id="twilio-from" value="${integrations.twilio?.fromNumber||''}"></div>
-        <button class="btn btn-primary w-full" onclick="saveTwilioConfig()">Save & Test Connection</button>
+      <div class="card">
+        <div class="card-header">
+          <span class="card-title"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg> SMS Templates</span>
+          <span style="font-size:11px;color:#64748b">Use {name}, {date}, {time}, {tech}, {address}</span>
+        </div>
+        <div class="card-body" style="padding:0 18px">
+          ${[
+            {key:'booking_confirm',label:'Booking Confirmation',icon:'<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>',
+              default:'Hi {name}, your 24 Hour Plumber appointment is confirmed for {date} at {time}. Tech: {tech}. Address: {address}. Reply STOP to opt out.'},
+            {key:'tech_on_way',label:'Technician on the Way',icon:'<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>',
+              default:'Hi {name}, your technician {tech} is on their way and will arrive shortly. 24 Hour Plumber - 01 524 0000'},
+            {key:'tech_delayed',label:'Technician Delayed',icon:'<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/></svg>',
+              default:'Hi {name}, apologies — your technician is running slightly late. We will be with you as soon as possible. 24 Hour Plumber - 01 524 0000'},
+            {key:'parts_ordered',label:'Parts Ordered',icon:'<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/></svg>',
+              default:'Hi {name}, parts for your repair have been ordered. We will contact you when they arrive to schedule completion. 24 Hour Plumber - 01 524 0000'},
+            {key:'job_complete',label:'Job Complete — Invoice',icon:'<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>',
+              default:'Hi {name}, your job is complete. Your invoice has been emailed. Thank you for choosing 24 Hour Plumber! Queries: 01 524 0000'},
+            {key:'request_payment',label:'Payment Reminder',icon:'<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>',
+              default:'Hi {name}, a friendly reminder that invoice {invoice} of {amount} is due. Pay online: {link} or call 01 524 0000. Thank you.'},
+          ].map(t=>{
+            const smsTemplates=DB.get('sms_templates',{});
+            const val=smsTemplates[t.key]||t.default;
+            return`<div style="padding:12px 0;border-bottom:1px solid #f1f5f9">
+              <div style="display:flex;align-items:center;gap:6px;font-weight:600;font-size:13px;color:#1e293b;margin-bottom:8px">
+                <span style="color:#007AFF">${t.icon}</span> ${t.label}
+              </div>
+              <textarea class="form-textarea" style="font-size:12px;min-height:64px" id="sms-tpl-${t.key}" onchange="saveSmsTemplate('${t.key}',this.value)">${val}</textarea>
+              <div style="display:flex;justify-content:flex-end;margin-top:6px">
+                <button class="btn btn-ghost btn-xs" onclick="document.getElementById('sms-tpl-${t.key}').value='${t.default.replace(/'/g,"\\'")}';saveSmsTemplate('${t.key}','${t.default.replace(/'/g,"\\'")}')">Reset</button>
+              </div>
+            </div>`;
+          }).join('')}
+        </div>
+        <div class="card-footer"><button class="btn btn-primary btn-sm" onclick="toast('SMS templates saved','success')">Save All Templates</button></div>
       </div>
     </div>
   </div>
@@ -4947,6 +5024,53 @@ function saveTwilioConfig(){
   renderSettings();
 }
 
+function saveSmsTemplate(key,val){
+  const t=DB.get('sms_templates',{});
+  t[key]=val;
+  DB.set('sms_templates',t);
+}
+
+function addMaterialItem(){
+  const body=`<form id="add-material-form">
+    <div class="form-grid-2">
+      <div class="form-group"><label class="form-label">Item Code</label><input class="form-input" id="mat-code" placeholder="MAT010"></div>
+      <div class="form-group"><label class="form-label">Category</label>
+        <select class="form-select" id="mat-cat">
+          <option>Labour</option><option>Fittings</option><option>Valves</option><option>Heating</option><option>Service</option><option>Cert</option><option>Other</option>
+        </select>
+      </div>
+    </div>
+    <div class="form-group"><label class="form-label">Item Name *</label><input class="form-input" id="mat-name" required placeholder="e.g. 22mm Ball Valve"></div>
+    <div class="form-grid-2">
+      <div class="form-group"><label class="form-label">Unit Price (€ inc VAT)</label><input class="form-input" id="mat-price" type="number" step="0.01" min="0" value="0.00"></div>
+      <div class="form-group"><label class="form-label">Cost Price (€)</label><input class="form-input" id="mat-cost" type="number" step="0.01" min="0" value="0.00"></div>
+    </div>
+  </form>`;
+  openModal('Add Material / Service',body,`
+    <button class="btn btn-ghost" onclick="closeModal()">Cancel</button>
+    <button class="btn btn-primary" onclick="saveMaterialItem()">Add Item</button>`);
+}
+
+function saveMaterialItem(){
+  const name=document.getElementById('mat-name').value.trim();
+  if(!name){toast('Item name is required','error');return;}
+  const catalog=DB.get('materials_catalog',[]);
+  const nextId=Math.max(0,...catalog.map(m=>m.id))+1;
+  catalog.push({
+    id:nextId,
+    code:document.getElementById('mat-code').value||'MAT'+String(nextId).padStart(3,'0'),
+    name,
+    cat:document.getElementById('mat-cat').value,
+    price:parseFloat(document.getElementById('mat-price').value)||0,
+    cost:parseFloat(document.getElementById('mat-cost').value)||0,
+    tax:'23%'
+  });
+  DB.set('materials_catalog',catalog);
+  closeModal();
+  toast('Item added to price list','success');
+  renderSettings();
+}
+
 function resetAllData(){
   confirm2('Reset All Data','This will clear everything and re-seed demo data. Are you sure?','Reset All',()=>{
     localStorage.clear();
@@ -5035,6 +5159,7 @@ function jcRenderLeft(job){
     <div><div style="font-size:11px;color:#64748b;margin-bottom:3px;font-weight:600">Eircode</div><input class="jc-inp" value="${escH(job.eircode||'')}" placeholder="D14 X9Y2" onchange="jcSave(j=>{j.eircode=this.value})"></div>
   </div>
   <div><div style="font-size:11px;color:#64748b;margin-bottom:3px;font-weight:600">Address</div><input class="jc-inp" value="${escH(job.address||'')}" onchange="jcSave(j=>{j.address=this.value})"></div>
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px;margin-top:8px"><div><div style="font-size:11px;color:#64748b;margin-bottom:3px;font-weight:600">PO Number</div><input class="jc-inp" value="${escH(job.poNumber||'')}" placeholder="Purchase Order #" onchange="jcSave(j=>{j.poNumber=this.value})"></div><div><div style="font-size:11px;color:#64748b;margin-bottom:3px;font-weight:600">Duration (min)</div><input class="jc-inp" type="number" value="${job.duration||60}" onchange="jcSave(j=>{j.duration=parseInt(this.value)||60})"></div></div>
 
   <div class="jc-st">Status & Category</div>
   <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
