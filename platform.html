@@ -1537,6 +1537,52 @@ function renderControlRoom(){
       </div>
     </div>
   </div>
+
+  <div class="card mb-3">
+    <div class="card-header" style="background:linear-gradient(135deg,#1e293b 0%,#0f172a 100%);border-radius:11px 11px 0 0">
+      <span class="card-title" style="color:#f1f5f9">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#60a5fa" stroke-width="2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 13.5a19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 3.6 2.69h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L7.91 10.1a16 16 0 0 0 6 6l1.27-.95a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7a2 2 0 0 1 1.72 2z"/></svg>
+        AI Voice — Aoife
+      </span>
+      <span style="background:#22c55e;color:#fff;font-size:11px;font-weight:700;padding:3px 10px;border-radius:12px">
+        <span style="display:inline-block;width:7px;height:7px;border-radius:50%;background:#fff;margin-right:5px;vertical-align:middle"></span>LIVE
+      </span>
+    </div>
+    <div class="card-body" style="padding:14px 18px">
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px;margin-bottom:14px">
+        <div style="background:#f8fafc;border-radius:10px;padding:12px;text-align:center;border:1px solid #e2e8f0">
+          <div style="font-size:11px;color:#64748b;font-weight:600;margin-bottom:4px">Status</div>
+          <div style="font-size:14px;font-weight:700;color:#22c55e">Active</div>
+          <div style="font-size:11px;color:#94a3b8">Answering inbound</div>
+        </div>
+        <div style="background:#f8fafc;border-radius:10px;padding:12px;text-align:center;border:1px solid #e2e8f0">
+          <div style="font-size:11px;color:#64748b;font-weight:600;margin-bottom:4px">Phone Number</div>
+          <div style="font-size:13px;font-weight:700;color:#1e293b">+1 507 623 5937</div>
+          <div style="font-size:11px;color:#94a3b8">Twilio trial</div>
+        </div>
+        <div style="background:#f8fafc;border-radius:10px;padding:12px;text-align:center;border:1px solid #e2e8f0">
+          <div style="font-size:11px;color:#64748b;font-weight:600;margin-bottom:4px">Voice</div>
+          <div style="font-size:13px;font-weight:700;color:#1e293b">Colleen</div>
+          <div style="font-size:11px;color:#94a3b8">Irish female (ElevenLabs)</div>
+        </div>
+      </div>
+      <div style="background:#f8fafc;border-radius:8px;padding:12px;margin-bottom:12px">
+        <div style="font-size:11px;font-weight:700;color:#64748b;text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px">Recent Calls</div>
+        <div style="font-size:12px;color:#94a3b8;font-style:italic">No calls yet — waiting for first inbound call to +1 507 623 5937</div>
+      </div>
+      <div style="display:flex;gap:8px">
+        <a href="https://dashboard.vapi.ai" target="_blank" style="display:inline-flex;align-items:center;gap:6px;padding:7px 14px;background:#1e293b;color:#f1f5f9;border-radius:8px;font-size:12px;font-weight:600;text-decoration:none">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+          VAPI Dashboard
+        </a>
+        <button onclick="toast('Aoife is active and answering calls on +1 507 623 5937','success')" style="padding:7px 14px;background:#f0fdf4;border:1px solid #86efac;color:#16a34a;border-radius:8px;font-size:12px;font-weight:600;cursor:pointer">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:middle;margin-right:4px"><polyline points="20 6 9 17 4 12"/></svg>
+          Test Status
+        </button>
+      </div>
+    </div>
+  </div>
+
   <div class="card">
     <div class="card-header"><span class="card-title"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg> Quick Navigation</span></div>
     <div class="card-body">
@@ -1573,30 +1619,76 @@ function renderJobs(){
   renderNewJobForm();
 }
 
+// ── Action-Required helpers ──────────────────────────
+function jobStatusDots(j){
+  const dots=[];
+  // Blue: unread (no diary notes posted by staff)
+  const notes=(j.activityLog||[]).filter(e=>e.type==='note');
+  if(!notes.length)dots.push({color:'#007AFF',title:'No notes yet — unread'});
+  // Red: missed call (lead linked and not handled)
+  const leads=DB.get('leads',[]);
+  const missed=leads.find(l=>l.jobId===j.id&&l.channel==='phone'&&!l.handled);
+  if(missed)dots.push({color:'#FF3B30',title:'Missed call on this job'});
+  // Yellow: job is in a queue
+  if(j.queue&&j.queue!=='')dots.push({color:'#FF9500',title:'In queue: '+j.queue});
+  // Purple: quote sent but not accepted (>3 days)
+  if(j.status==='Quote'&&j.quoteSentAt&&(Date.now()-j.quoteSentAt)>259200000)dots.push({color:'#AF52DE',title:'Quote pending — follow up!'});
+  return dots;
+}
+
+function jobActionRequired(j){
+  const dots=jobStatusDots(j);
+  return dots.length>0;
+}
+
+let kanbanFilter='all'; // 'all' | 'action-required'
+
 function renderJobsKanban(){
   const el=document.getElementById('jobs-kanban-content');
   if(!el)return;
-  const jobs=DB.get('jobs',[]);
+  let allJobs=DB.get('jobs',[]);
+  const actionCount=allJobs.filter(j=>jobActionRequired(j)).length;
+
+  const filterBar=`<div style="display:flex;gap:8px;margin-bottom:14px;align-items:center">
+    <button onclick="kanbanFilter='all';renderJobsKanban()" style="padding:5px 14px;border-radius:20px;font-size:12px;font-weight:600;border:1px solid ${kanbanFilter==='all'?'#007AFF':'#e2e8f0'};background:${kanbanFilter==='all'?'#007AFF':'#fff'};color:${kanbanFilter==='all'?'#fff':'#64748b'};cursor:pointer">All Jobs</button>
+    <button onclick="kanbanFilter='action-required';renderJobsKanban()" style="padding:5px 14px;border-radius:20px;font-size:12px;font-weight:600;border:1px solid ${kanbanFilter==='action-required'?'#FF3B30':'#e2e8f0'};background:${kanbanFilter==='action-required'?'#FF3B30':'#fff'};color:${kanbanFilter==='action-required'?'#fff':'#64748b'};cursor:pointer">
+      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="margin-right:4px;vertical-align:middle"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+      Action Required ${actionCount>0?`<span style="background:rgba(255,255,255,0.3);border-radius:10px;padding:1px 6px;margin-left:4px">${actionCount}</span>`:''}
+    </button>
+    <button onclick="kanbanFilter='unscheduled';renderJobsKanban()" style="padding:5px 14px;border-radius:20px;font-size:12px;font-weight:600;border:1px solid ${kanbanFilter==='unscheduled'?'#FF9500':'#e2e8f0'};background:${kanbanFilter==='unscheduled'?'#FF9500':'#fff'};color:${kanbanFilter==='unscheduled'?'#fff':'#64748b'};cursor:pointer">Unscheduled</button>
+    <button onclick="kanbanFilter='in-progress';renderJobsKanban()" style="padding:5px 14px;border-radius:20px;font-size:12px;font-weight:600;border:1px solid ${kanbanFilter==='in-progress'?'#34C759':'#e2e8f0'};background:${kanbanFilter==='in-progress'?'#34C759':'#fff'};color:${kanbanFilter==='in-progress'?'#fff':'#64748b'};cursor:pointer">In Progress</button>
+  </div>`;
+
+  let jobs=allJobs;
+  if(kanbanFilter==='action-required')jobs=jobs.filter(j=>jobActionRequired(j));
+  else if(kanbanFilter==='unscheduled')jobs=jobs.filter(j=>!j.engineer||!j.date);
+  else if(kanbanFilter==='in-progress')jobs=jobs.filter(j=>j.status==='In Progress'||j.status==='Work Order');
+
   const cols=JOB_STATUSES.map(st=>{
     const col=jobs.filter(j=>j.status===st);
     return`<div class="kanban-col">
       <div class="kanban-col-header"><span>${st}</span><span class="kanban-count">${col.length}</span></div>
       <div class="kanban-body" data-status="${st}" ondragover="event.preventDefault();this.classList.add('drag-over')" ondragleave="this.classList.remove('drag-over')" ondrop="kanbanDrop(event,'${st}')">
-        ${col.map(j=>`<div class="kanban-card" draggable="true" data-job-id="${j.id}" ondragstart="kanbanDragStart(event)" onclick="showJobDetail('${j.id}')">
-          <div class="job-num">${j.id}</div>
-          <div class="job-customer">${j.customer}</div>
-          <div class="job-type">${j.type}</div>
-          <div class="job-meta"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg> ${j.date} ${j.time}</div>
-          <div class="job-footer">
-            ${engAvatar(j.engineer)}
-            <span class="job-amount">${fmtAmt(j.amount)}</span>
-          </div>
-        </div>`).join('')}
+        ${col.map(j=>{
+          const dots=jobStatusDots(j);
+          const dotsHTML=dots.length?`<div style="display:flex;gap:4px;margin-bottom:5px">${dots.map(d=>`<span title="${d.title}" style="width:8px;height:8px;border-radius:50%;background:${d.color};display:inline-block"></span>`).join('')}</div>`:'';
+          return`<div class="kanban-card" draggable="true" data-job-id="${j.id}" ondragstart="kanbanDragStart(event)" onclick="showJobDetail('${j.id}')">
+            ${dotsHTML}
+            <div class="job-num">${j.id}</div>
+            <div class="job-customer">${j.customer}</div>
+            <div class="job-type">${j.type}</div>
+            <div class="job-meta"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg> ${j.date} ${j.time}</div>
+            <div class="job-footer">
+              ${engAvatar(j.engineer)}
+              <span class="job-amount">${fmtAmt(j.amount)}</span>
+            </div>
+          </div>`;
+        }).join('')}
         <button class="btn btn-ghost btn-sm w-full mt-2" style="border-style:dashed" onclick="quickAddJobStatus('${st}')">+ Add</button>
       </div>
     </div>`;
   }).join('');
-  el.innerHTML=`<div class="kanban-board">${cols}</div>`;
+  el.innerHTML=filterBar+`<div class="kanban-board">${cols}</div>`;
 }
 
 function renderJobsList(){
@@ -2412,13 +2504,79 @@ function renderDispatch(){
       </div>
     </div>
     <div class="dcal-board-sidebar">
-      <div class="card">
-        <div class="card-header"><span class="card-title"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg> Unscheduled (${unscheduled.length})</span></div>
-        <div style="padding:8px;max-height:500px;overflow-y:auto">${unschedHTML}</div>
+      <div class="card" style="margin-bottom:12px">
+        <div style="padding:8px">
+          <input class="form-input" id="dispatch-search" placeholder="Search jobs…" oninput="renderDispatchSidebarFiltered()" style="font-size:12px;padding:6px 10px">
+        </div>
+        <div style="padding:0 8px 8px;display:flex;flex-direction:column;gap:4px">
+          ${[
+            {id:'action-required',label:'Action Required',color:'#FF3B30',count:jobs.filter(j=>jobActionRequired(j)).length},
+            {id:'unscheduled',label:'Unscheduled',color:'#FF9500',count:unscheduled.length},
+            {id:'in-progress',label:'In Progress',color:'#007AFF',count:jobs.filter(j=>j.status==='Work Order'||j.status==='In Progress').length},
+            {id:'completed-48',label:'Completed (48hr)',color:'#34C759',count:jobs.filter(j=>j.status==='Completed'&&(Date.now()-new Date(j.completedAt||Date.now()).getTime())<172800000).length},
+            {id:'all',label:'All Jobs',color:'#64748b',count:jobs.length},
+          ].map(f=>`<button onclick="window.dispatchFilter='${f.id}';renderDispatchSidebar()" id="df-${f.id}" style="display:flex;align-items:center;justify-content:space-between;padding:7px 10px;border-radius:8px;border:none;background:transparent;cursor:pointer;font-size:12px;font-weight:600;color:#1e293b;text-align:left;transition:background .1s" onmouseover="this.style.background='#f1f5f9'" onmouseout="this.style.background='transparent'">
+            <span style="display:flex;align-items:center;gap:7px">
+              <span style="width:8px;height:8px;border-radius:50%;background:${f.color};display:inline-block;flex-shrink:0"></span>
+              ${f.label}
+            </span>
+            <span style="background:#f1f5f9;color:#64748b;border-radius:10px;padding:1px 7px;font-size:10px;font-weight:700">${f.count}</span>
+          </button>`).join('')}
+        </div>
+      </div>
+      <div class="card" id="dispatch-sidebar-jobs">
+        <div class="card-header" style="padding:8px 12px"><span class="card-title" style="font-size:12px">Unscheduled (${unscheduled.length})</span></div>
+        <div style="padding:8px;max-height:440px;overflow-y:auto" id="dispatch-sidebar-list">${unschedHTML}</div>
       </div>
     </div>
   </div>`;
   attachDcalResizeListeners();
+  window.dispatchFilter=window.dispatchFilter||'unscheduled';
+  // Set up sidebar filter state
+  window._dispatchAllJobs=jobs;
+}
+
+function renderDispatchSidebar(){
+  const filter=window.dispatchFilter||'unscheduled';
+  const jobs=DB.get('jobs',[]);
+  let filtered;
+  if(filter==='action-required')filtered=jobs.filter(j=>jobActionRequired(j));
+  else if(filter==='unscheduled')filtered=jobs.filter(j=>!j.date||!j.time||j.status==='Quote');
+  else if(filter==='in-progress')filtered=jobs.filter(j=>j.status==='Work Order'||j.status==='In Progress');
+  else if(filter==='completed-48')filtered=jobs.filter(j=>j.status==='Completed'&&(Date.now()-new Date(j.completedAt||Date.now()).getTime())<172800000);
+  else filtered=jobs;
+  renderDispatchSidebarList(filtered);
+  // Update header
+  const labels={'action-required':'Action Required','unscheduled':'Unscheduled','in-progress':'In Progress','completed-48':'Completed (48hr)','all':'All Jobs'};
+  const hdr=document.querySelector('#dispatch-sidebar-jobs .card-header .card-title');
+  if(hdr)hdr.textContent=`${labels[filter]||filter} (${filtered.length})`;
+}
+
+function renderDispatchSidebarFiltered(){
+  const q=(document.getElementById('dispatch-search')?.value||'').toLowerCase();
+  const jobs=DB.get('jobs',[]);
+  const filtered=q?jobs.filter(j=>[j.id,j.customer,j.type,j.engineer].join(' ').toLowerCase().includes(q)):jobs;
+  renderDispatchSidebarList(filtered);
+}
+
+function renderDispatchSidebarList(jobs){
+  const el=document.getElementById('dispatch-sidebar-list');
+  if(!el)return;
+  if(!jobs.length){el.innerHTML='<div style="padding:12px;text-align:center;color:#94a3b8;font-size:12px">No jobs found</div>';return;}
+  el.innerHTML=jobs.map(function(j){
+    const dots=jobStatusDots(j);
+    const dotsHTML=dots.map(d=>`<span style="width:7px;height:7px;border-radius:50%;background:${d.color};display:inline-block" title="${d.title}"></span>`).join('');
+    const safeId=j.id.replace(/'/g,"\\'");
+    return '<div class="unscheduled-item" draggable="true" ondragstart="dcalDragStart(event,\''+safeId+'\')" onclick="assignUnscheduled(\''+safeId+'\')">'+
+      '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:2px">'+
+        '<div style="font-weight:700;color:#007AFF">'+j.id+'</div>'+
+        '<div style="display:flex;gap:3px">'+dotsHTML+'</div>'+
+      '</div>'+
+      '<div style="font-weight:600;font-size:12px;margin:2px 0">'+(j.customer||'')+'</div>'+
+      '<div style="color:#64748b;font-size:12px">'+(j.type||'')+'</div>'+
+      '<div style="color:#94a3b8;font-size:11px;margin-top:3px">'+(j.engineer||'Unassigned')+(j.date?' \u00b7 '+j.date:'')+'</div>'+
+    '</div>';
+  }).join('');
 }
 
 function openNewJobForSlot(engineer,slot){assignJobToSlot(engineer,slot);}
@@ -4574,7 +4732,7 @@ function renderSettings(){
   <div class="page-header">
     <div class="page-header-left"><div class="page-title"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg> Settings</div></div>
   </div>
-  ${tabsHTML([{id:'company',label:'<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M3 15h18M9 3v18M15 3v18"/></svg> Company'},{id:'staff',label:'<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg> Staff'},{id:'integrations',label:'<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6L6 18"/><path d="M7 17l-5 5"/><path d="M17 7l5-5"/><path d="M4 4l4 4m8 0l4-4m-4 12l4 4m-12-4l-4 4"/></svg> Integrations'},{id:'sms',label:'<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="5" y="2" width="14" height="20" rx="2"/><line x1="12" y1="18" x2="12.01" y2="18"/></svg> SMS'},{id:'system',label:'<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg> System'}],'settings')}
+  ${tabsHTML([{id:'company',label:'<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M3 15h18M9 3v18M15 3v18"/></svg> Company'},{id:'staff',label:'<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg> Staff'},{id:'automation',label:'<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg> Automation'},{id:'integrations',label:'<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6L6 18"/><path d="M7 17l-5 5"/><path d="M17 7l5-5"/><path d="M4 4l4 4m8 0l4-4m-4 12l4 4m-12-4l-4 4"/></svg> Integrations'},{id:'sms',label:'<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="5" y="2" width="14" height="20" rx="2"/><line x1="12" y1="18" x2="12.01" y2="18"/></svg> SMS'},{id:'system',label:'<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg> System'}],'settings')}
   <div class="tab-content active" data-tab="company" data-tab-group="settings">
     <div class="card" style="max-width:580px">
       <div class="card-header"><span class="card-title">Company Details</span></div>
@@ -4611,6 +4769,53 @@ function renderSettings(){
           </div>
         </div>`).join('')}
         <button class="btn btn-primary btn-sm mt-3 mb-3" onclick="toast('New staff form — use HR section to add engineers','info')">+ Add Staff Member</button>
+      </div>
+    </div>
+  </div>
+  <div class="tab-content" data-tab="automation" data-tab-group="settings">
+    <div style="max-width:640px">
+      <div class="card mb-3">
+        <div class="card-header">
+          <span class="card-title"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg> Automation Rules</span>
+          <div style="font-size:12px;color:#64748b">Messages send 7am–7pm only</div>
+        </div>
+        <div class="card-body" style="padding:0 18px">
+          ${[
+            {key:'booking_confirmation',label:'Booking Confirmation',desc:'Send SMS/email when a job is booked in',icon:'<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>',defaultOn:true},
+            {key:'arrival_alert',label:'Technician on the way',desc:'SMS when engineer marks as travelling',icon:'<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>',defaultOn:true},
+            {key:'job_complete',label:'Job Completion Summary',desc:'Email receipt when job marked Completed',icon:'<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>',defaultOn:true},
+            {key:'quote_followup',label:'Quote Follow-up',desc:'Chase unaccepted quotes after 3 days',icon:'<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>',defaultOn:false},
+            {key:'payment_reminder',label:'Payment Reminder',desc:'Chase unpaid invoices after 7 days',icon:'<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>',defaultOn:false},
+            {key:'feedback_request',label:'Customer Feedback Request',desc:'Send review request 24h after completion',icon:'<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>',defaultOn:false},
+            {key:'recurring_reminder',label:'Recurring Job Reminder',desc:'Remind customers of annual/seasonal jobs',icon:'<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>',defaultOn:false},
+            {key:'parts_delay',label:'Parts / Delay Notice',desc:'Notify customer when parts are ordered or job is delayed',icon:'<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/></svg>',defaultOn:false},
+          ].map(a=>{
+            const automations=DB.get('automations',{});
+            const isOn=automations[a.key]!==undefined?automations[a.key]:a.defaultOn;
+            return`<div style="display:flex;align-items:center;justify-content:space-between;padding:12px 0;border-bottom:1px solid #f1f5f9">
+              <div style="display:flex;align-items:center;gap:12px">
+                <div style="color:#007AFF">${a.icon}</div>
+                <div>
+                  <div style="font-weight:600;font-size:13px;color:#1e293b">${a.label}</div>
+                  <div style="font-size:12px;color:#64748b;margin-top:2px">${a.desc}</div>
+                </div>
+              </div>
+              <label class="toggle" style="flex-shrink:0"><input type="checkbox" ${isOn?'checked':''} onchange="toggleAutomation('${a.key}',this.checked)"><span class="toggle-slider"></span></label>
+            </div>`;
+          }).join('')}
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-header"><span class="card-title">Send Window</span></div>
+        <div class="card-body">
+          <div style="font-size:13px;color:#64748b;margin-bottom:12px">Automated messages are only sent between these hours to avoid disturbing customers.</div>
+          <div style="display:flex;gap:16px;align-items:center">
+            <div class="form-group" style="margin:0"><label class="form-label">From</label><input class="form-input" type="time" value="07:00" style="width:110px" id="auto-send-from"></div>
+            <div style="color:#64748b;margin-top:18px">to</div>
+            <div class="form-group" style="margin:0"><label class="form-label">Until</label><input class="form-input" type="time" value="19:00" style="width:110px" id="auto-send-until"></div>
+            <button class="btn btn-primary btn-sm" style="margin-top:18px" onclick="saveAutoWindow()">Save</button>
+          </div>
+        </div>
       </div>
     </div>
   </div>
@@ -4690,6 +4895,20 @@ function saveCompanySettings(e){
     address:document.getElementById('co-addr').value,email:document.getElementById('co-email').value,
     rgi:document.getElementById('co-rgi').value,website:document.getElementById('co-web').value});
   toast('Company details saved <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>','success');
+}
+
+function toggleAutomation(key,on){
+  const automations=DB.get('automations',{});
+  automations[key]=on;
+  DB.set('automations',automations);
+  toast(`Automation ${on?'enabled':'disabled'}: ${key.replace(/_/g,' ')}`,'success');
+}
+
+function saveAutoWindow(){
+  const from=document.getElementById('auto-send-from')?.value||'07:00';
+  const until=document.getElementById('auto-send-until')?.value||'19:00';
+  DB.set('auto_send_window',{from,until});
+  toast(`Send window saved: ${from}–${until}`,'success');
 }
 
 function updateEngColor(name,color){
@@ -4863,19 +5082,37 @@ function jcRenderLeft(job){
 function jcRenderRight(job){
   const el=document.getElementById('jc-col-right');
   if(!el)return;
-  const colors={created:'#94a3b8',booking:'#2563eb',status:'#16a34a',note:'#f59e0b'};
-  const icons={created:'ℹ️',booking:'<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>',status:'<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg>',note:'<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>'};
+  const colors={created:'#94a3b8',booking:'#007AFF',status:'#34C759',note:'#FF9500',call:'#AF52DE'};
+  const icons={
+    created:'<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>',
+    booking:'<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>',
+    status:'<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>',
+    note:'<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>',
+    call:'<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 13.5"/></svg>'
+  };
+  // Diary entries are append-only — notes never show delete button
   const feedHTML=(job.activityLog||[]).slice().reverse().map(e=>{
     const c=colors[e.type]||'#94a3b8';
-    return`<div class="jc-ne"><div class="jc-ne-stripe" style="background:${c}"></div><div class="jc-ne-bd"><div class="jc-ne-title">${icons[e.type]||'<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>'} ${e.title||''}</div><div class="jc-ne-txt">${e.text||''}</div><div class="jc-ne-meta">${e.by?`by ${e.by} · `:''} ${ago(e.ts)}</div></div></div>`;
-  }).join('')||'<div style="font-size:12px;color:#94a3b8;padding:8px 0">No activity yet</div>';
+    const ts=new Date(e.ts).toLocaleString('en-IE',{day:'2-digit',month:'short',hour:'2-digit',minute:'2-digit'});
+    return`<div class="jc-ne"><div class="jc-ne-stripe" style="background:${c}"></div><div class="jc-ne-bd"><div class="jc-ne-title" style="display:flex;align-items:center;gap:5px"><span style="color:${c}">${icons[e.type]||''}</span> ${e.title||''}</div><div class="jc-ne-txt">${e.text||''}</div><div class="jc-ne-meta">${e.by?`${e.by} · `:''} ${ts}</div></div></div>`;
+  }).join('')||'<div style="font-size:12px;color:#94a3b8;padding:8px 0">No diary entries yet</div>';
 
   el.innerHTML=`
-  <div style="margin-bottom:10px">
-    <textarea class="jc-ta" id="jc-note-input" placeholder="Type a job note here…" style="min-height:72px;margin-bottom:6px"></textarea>
-    <div style="display:flex;justify-content:flex-end"><button class="btn btn-primary btn-sm" onclick="jcPostNote()">Post Note</button></div>
+  <div style="background:#f8fafc;border-radius:10px;padding:10px;margin-bottom:12px;border:1px solid #e2e8f0">
+    <div style="font-size:11px;font-weight:700;color:#64748b;text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px">
+      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+      Post Note to Diary
+    </div>
+    <textarea class="jc-ta" id="jc-note-input" placeholder="Add a note to the job diary…" style="min-height:64px;margin-bottom:8px;background:#fff"></textarea>
+    <div style="display:flex;justify-content:flex-end"><button class="btn btn-primary btn-sm" onclick="jcPostNote()">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="vertical-align:middle;margin-right:4px"><polyline points="20 6 9 17 4 12"/></svg>
+      Post Note
+    </button></div>
   </div>
-  <div style="font-size:10px;font-weight:700;color:#94a3b8;text-transform:uppercase;letter-spacing:.6px;margin-bottom:8px">Activity</div>
+  <div style="font-size:11px;font-weight:700;color:#64748b;text-transform:uppercase;letter-spacing:.5px;margin-bottom:10px">
+    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 2v20l2-1 2 1 2-1 2 1 2-1 2 1 2-1 2 1V2l-2 1-2-1-2 1-2-1-2 1-2-1-2 1z"/></svg>
+    Job Diary — Append Only
+  </div>
   <div class="jc-note-feed" id="jc-note-feed">${feedHTML}</div>`;
 }
 

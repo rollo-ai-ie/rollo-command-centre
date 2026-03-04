@@ -1,0 +1,1392 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>Rollo Field Services</title>
+<style>
+:root{
+  --brand:#7c3aed;--brand2:#4f46e5;--brand-light:#f5f3ff;
+  --sidebar:#1a1d21;--sidebar-hover:#27292d;--sidebar-active:#5b21b6;
+  --bg:#f8f9fc;--card:#fff;--border:#e5e7eb;--text:#111827;--muted:#6b7280;
+  --success:#10b981;--warning:#f59e0b;--danger:#ef4444;--info:#3b82f6;
+  --radius:8px;--shadow:0 1px 3px rgba(0,0,0,.08);--shadow-md:0 4px 16px rgba(0,0,0,.12);
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%;font-family:'Segoe UI',system-ui,sans-serif;background:var(--bg);color:var(--text);font-size:13px}
+.app{display:flex;height:100vh;overflow:hidden}
+/* Sidebar */
+.sidebar{width:220px;background:var(--sidebar);display:flex;flex-direction:column;flex-shrink:0;overflow-y:auto}
+.sidebar-logo{padding:16px 14px 12px;display:flex;align-items:center;gap:10px;border-bottom:1px solid rgba(255,255,255,.08)}
+.logo-text{font-size:13px;font-weight:700;color:#fff;line-height:1.2}
+.logo-sub{font-size:10px;color:#818cf8}
+.nav-group{padding:10px 0}
+.nav-label{padding:8px 14px 3px;font-size:10px;font-weight:700;color:#6b7280;text-transform:uppercase;letter-spacing:.8px}
+.nav-link{display:flex;align-items:center;gap:9px;padding:8px 14px;color:#d1d2d3;cursor:pointer;font-size:13px;border-left:2px solid transparent;transition:all .15s}
+.nav-link:hover{background:var(--sidebar-hover);color:#fff}
+.nav-link.active{background:var(--sidebar-active);color:#fff;border-left-color:#a78bfa}
+.nav-link .ico{font-size:15px;width:18px;text-align:center;flex-shrink:0}
+.nb{margin-left:auto;background:var(--danger);color:#fff;border-radius:10px;padding:1px 6px;font-size:10px;font-weight:700}
+.nav-link .ndot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
+.sidebar-back{display:flex;align-items:center;gap:8px;padding:8px 14px;color:#818cf8;font-size:12px;cursor:pointer;border-top:1px solid rgba(255,255,255,.08);margin-top:auto}
+.sidebar-back:hover{color:#a78bfa}
+/* Main */
+.main{flex:1;display:flex;flex-direction:column;overflow:hidden}
+.topbar{height:52px;background:var(--card);border-bottom:1px solid var(--border);display:flex;align-items:center;padding:0 18px;gap:10px;flex-shrink:0;box-shadow:var(--shadow)}
+.topbar-title{font-size:15px;font-weight:700;color:var(--text);flex:1}
+.search-box{display:flex;align-items:center;gap:8px;background:var(--bg);border:1px solid var(--border);border-radius:20px;padding:5px 14px;width:220px}
+.search-box input{border:none;background:transparent;outline:none;font-size:13px;width:100%}
+.content{flex:1;overflow-y:auto;padding:16px}
+/* Buttons */
+.btn{display:inline-flex;align-items:center;gap:6px;padding:7px 14px;border-radius:var(--radius);border:none;cursor:pointer;font-size:12px;font-weight:500;transition:all .15s;white-space:nowrap}
+.btn-brand{background:var(--brand);color:#fff}.btn-brand:hover{background:#6d28d9}
+.btn-primary{background:var(--brand2);color:#fff}.btn-primary:hover{background:#4338ca}
+.btn-success{background:var(--success);color:#fff}.btn-success:hover{filter:brightness(.9)}
+.btn-danger{background:var(--danger);color:#fff}.btn-danger:hover{filter:brightness(.9)}
+.btn-outline{background:transparent;border:1px solid var(--border);color:var(--text)}.btn-outline:hover{background:var(--bg)}
+.btn-ghost{background:transparent;border:none;color:var(--muted);cursor:pointer;padding:4px 8px;border-radius:var(--radius)}.btn-ghost:hover{background:var(--bg);color:var(--text)}
+.btn-sm{padding:4px 10px;font-size:11px}
+.btn-xs{padding:3px 8px;font-size:10px}
+/* Cards */
+.card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);box-shadow:var(--shadow)}
+.card-header{display:flex;align-items:center;justify-content:space-between;padding:12px 14px;border-bottom:1px solid var(--border)}
+.card-title{font-size:13px;font-weight:700;display:flex;align-items:center;gap:6px}
+.card-body{padding:12px 14px}
+/* Stats */
+.stats-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:14px}
+.stat{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:14px;box-shadow:var(--shadow)}
+.stat-label{font-size:11px;color:var(--muted);font-weight:600;text-transform:uppercase;letter-spacing:.5px}
+.stat-val{font-size:28px;font-weight:800;line-height:1.1;margin-top:4px}
+.stat-sub{font-size:11px;color:var(--muted);margin-top:3px}
+/* Tables */
+.tbl{width:100%;border-collapse:collapse}
+.tbl th{font-size:10px;color:var(--muted);font-weight:700;text-align:left;padding:8px 12px;border-bottom:2px solid var(--border);text-transform:uppercase;letter-spacing:.5px;background:#f9fafb;white-space:nowrap}
+.tbl td{padding:10px 12px;font-size:12px;border-bottom:1px solid var(--border);vertical-align:middle}
+.tbl tr:last-child td{border-bottom:none}
+.tbl tbody tr:hover td{background:#fafafa;cursor:pointer}
+.tbl tbody tr.sel td{background:#f5f3ff}
+/* Pills */
+.pill{display:inline-flex;align-items:center;gap:4px;padding:3px 9px;border-radius:12px;font-size:10px;font-weight:700;white-space:nowrap}
+.pill-gray{background:#f3f4f6;color:#374151}
+.pill-blue{background:#dbeafe;color:#1d4ed8}
+.pill-orange{background:#ffedd5;color:#9a3412}
+.pill-green{background:#d1fae5;color:#065f46}
+.pill-purple{background:#ede9fe;color:#5b21b6}
+.pill-red{background:#fee2e2;color:#991b1b}
+.pill-yellow{background:#fef3c7;color:#92400e}
+/* Tags */
+.tag{display:inline-flex;padding:2px 7px;border-radius:10px;font-size:10px;font-weight:600}
+/* Avatars */
+.av{border-radius:50%;display:inline-flex;align-items:center;justify-content:center;color:#fff;font-weight:700;flex-shrink:0}
+.av-xl{width:40px;height:40px;font-size:14px}
+.av-lg{width:32px;height:32px;font-size:12px}
+.av-md{width:26px;height:26px;font-size:10px}
+.av-sm{width:20px;height:20px;font-size:8px}
+/* Grid helpers */
+.row{display:flex;gap:14px}
+.col{flex:1;min-width:0}
+.grid-2{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.grid-3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px}
+/* Modal */
+.overlay{position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:500;display:flex;align-items:center;justify-content:center;padding:16px}
+.overlay.hidden{display:none}
+.modal{background:var(--card);border-radius:12px;box-shadow:0 20px 60px rgba(0,0,0,.2);width:100%;max-width:540px;max-height:90vh;overflow-y:auto;animation:min .18s ease}
+.modal-lg{max-width:760px}
+@keyframes min{from{opacity:0;transform:translateY(-10px)}to{opacity:1;transform:none}}
+.modal-head{display:flex;align-items:center;justify-content:space-between;padding:16px 20px 12px;border-bottom:1px solid var(--border)}
+.modal-head h2{font-size:15px;font-weight:700}
+.modal-close{background:none;border:none;cursor:pointer;font-size:20px;color:var(--muted);line-height:1;padding:2px 6px;border-radius:4px}
+.modal-close:hover{background:var(--bg)}
+.modal-body{padding:20px}
+.modal-foot{padding:12px 20px;border-top:1px solid var(--border);display:flex;justify-content:flex-end;gap:8px}
+/* Forms */
+.fg{margin-bottom:14px}
+.fg label{display:block;font-size:12px;font-weight:600;margin-bottom:5px}
+.fg input,.fg select,.fg textarea{width:100%;border:1px solid var(--border);border-radius:var(--radius);padding:8px 12px;font-size:13px;outline:none;font-family:inherit}
+.fg input:focus,.fg select:focus,.fg textarea:focus{border-color:var(--brand);box-shadow:0 0 0 3px rgba(124,58,237,.1)}
+.fg textarea{resize:vertical;min-height:60px}
+.fg-row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+/* Dispatch Board */
+.dispatch-wrap{display:flex;gap:0;height:calc(100vh - 136px);overflow:hidden}
+.queue-panel{width:200px;flex-shrink:0;border-right:1px solid var(--border);overflow-y:auto;background:var(--card)}
+.queue-section{border-bottom:1px solid var(--border)}
+.queue-head{padding:8px 12px;font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;display:flex;justify-content:space-between;align-items:center;cursor:pointer;background:#f9fafb}
+.queue-head:hover{background:var(--bg)}
+.queue-count{background:var(--border);color:var(--muted);border-radius:10px;padding:1px 6px;font-size:10px}
+.queue-body{padding:6px}
+.q-card{background:var(--bg);border:1px solid var(--border);border-radius:6px;padding:7px 9px;margin-bottom:6px;cursor:grab;font-size:11px;transition:box-shadow .15s}
+.q-card:hover{box-shadow:var(--shadow-md)}
+.q-card:active{cursor:grabbing}
+.q-card.dragging{opacity:.5}
+.q-job-num{font-size:10px;color:var(--muted);font-family:monospace}
+.q-customer{font-weight:700;color:var(--text);margin:1px 0}
+.q-type{font-size:10px;color:var(--muted)}
+.grid-area{flex:1;overflow:auto;min-width:0}
+.dispatch-grid{display:grid;min-width:max-content}
+.dg-header{display:flex;border-bottom:2px solid var(--border);background:var(--card);position:sticky;top:0;z-index:10}
+.dg-time-col{width:60px;flex-shrink:0;border-right:1px solid var(--border)}
+.dg-staff-col{flex-shrink:0;width:160px;border-right:1px solid var(--border);padding:8px;text-align:center}
+.dg-staff-name{font-size:12px;font-weight:700}
+.dg-staff-count{font-size:10px;color:var(--muted)}
+.dg-body{display:flex;position:relative}
+.dg-time-labels{width:60px;flex-shrink:0;border-right:1px solid var(--border)}
+.dg-time-slot{height:40px;border-bottom:1px solid #f3f4f6;display:flex;align-items:flex-start;padding:2px 6px;font-size:10px;color:var(--muted);background:var(--card)}
+.dg-time-slot.hour{border-bottom-color:var(--border)}
+.dg-staff-lanes{display:flex;flex:1}
+.dg-lane{width:160px;flex-shrink:0;border-right:1px solid var(--border);position:relative}
+.dg-cell{height:40px;border-bottom:1px solid #f3f4f6;transition:background .1s}
+.dg-cell.hour{border-bottom-color:var(--border)}
+.dg-cell.drag-over{background:#f5f3ff}
+.dg-job-block{position:absolute;left:4px;right:4px;border-radius:5px;padding:4px 7px;cursor:pointer;overflow:hidden;box-shadow:0 1px 3px rgba(0,0,0,.1);transition:box-shadow .15s;z-index:2}
+.dg-job-block:hover{box-shadow:var(--shadow-md)}
+.dg-job-num{font-size:9px;opacity:.8;font-family:monospace}
+.dg-job-title{font-size:10px;font-weight:700;line-height:1.2}
+.dg-job-type{font-size:9px;opacity:.8}
+/* Staff cards */
+.staff-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px}
+.staff-card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:16px;box-shadow:var(--shadow);cursor:pointer;transition:all .15s}
+.staff-card:hover{box-shadow:var(--shadow-md);transform:translateY(-1px)}
+.staff-card-top{display:flex;align-items:center;gap:12px;margin-bottom:12px}
+.staff-info h3{font-size:14px;font-weight:700}
+.staff-info p{font-size:11px;color:var(--muted)}
+.staff-stats{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px}
+.staff-stat{background:var(--bg);border-radius:6px;padding:7px 10px;text-align:center}
+.staff-stat-val{font-size:18px;font-weight:800}
+.staff-stat-lab{font-size:10px;color:var(--muted)}
+/* Reports */
+canvas.chart-canvas{display:block;width:100%}
+/* Rollo Chat Widget */
+.chat-btn{position:fixed;bottom:24px;right:24px;width:52px;height:52px;background:linear-gradient(135deg,#7c3aed,#4f46e5);border-radius:50%;border:none;cursor:pointer;font-size:22px;box-shadow:0 4px 16px rgba(124,58,237,.4);z-index:300;display:flex;align-items:center;justify-content:center;transition:transform .2s}
+.chat-btn:hover{transform:scale(1.08)}
+.chat-panel{position:fixed;bottom:86px;right:24px;width:320px;height:400px;background:var(--card);border:1px solid var(--border);border-radius:12px;box-shadow:var(--shadow-md);z-index:300;display:flex;flex-direction:column;animation:min .18s ease}
+.chat-panel.hidden{display:none}
+.chat-head{padding:12px 14px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:10px;background:linear-gradient(135deg,#7c3aed,#4f46e5);border-radius:12px 12px 0 0}
+.chat-head-info{flex:1}
+.chat-head-info h4{color:#fff;font-size:13px;font-weight:700}
+.chat-head-info p{color:#c4b5fd;font-size:10px}
+.chat-close{background:none;border:none;color:#fff;cursor:pointer;font-size:16px;opacity:.8}
+.chat-close:hover{opacity:1}
+.chat-msgs{flex:1;overflow-y:auto;padding:10px 12px;display:flex;flex-direction:column;gap:8px}
+.chat-msg{display:flex;gap:7px}
+.chat-msg.user{flex-direction:row-reverse}
+.chat-bubble{max-width:75%;padding:7px 10px;border-radius:10px;font-size:12px;line-height:1.45}
+.chat-bubble.rollo{background:var(--brand-light);border:1px solid #ddd6fe;border-radius:0 10px 10px 10px}
+.chat-bubble.user{background:var(--brand);color:#fff;border-radius:10px 0 10px 10px}
+.chat-typing{font-size:11px;color:var(--muted);font-style:italic;padding:0 12px}
+.chat-input-row{padding:8px 12px;border-top:1px solid var(--border);display:flex;gap:7px}
+.chat-input{flex:1;border:1px solid var(--border);border-radius:20px;padding:6px 12px;font-size:12px;outline:none;font-family:inherit}
+.chat-input:focus{border-color:var(--brand)}
+.chat-send{background:var(--brand);color:#fff;border:none;border-radius:50%;width:30px;height:30px;cursor:pointer;font-size:13px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+/* Activity feed */
+.act-item{display:flex;gap:9px;padding:8px 0;border-bottom:1px solid var(--border)}
+.act-item:last-child{border-bottom:none}
+.act-body{flex:1}.act-name{font-weight:700;font-size:12px}.act-text{font-size:11px;color:var(--muted);margin-top:1px}
+.act-time{font-size:10px;color:var(--muted);white-space:nowrap}
+/* Customer detail */
+.cust-detail{display:flex;gap:0}
+.cust-list{width:280px;flex-shrink:0;border-right:1px solid var(--border);overflow-y:auto}
+.cust-list-item{padding:11px 14px;border-bottom:1px solid var(--border);cursor:pointer;transition:background .15s}
+.cust-list-item:hover{background:var(--bg)}
+.cust-list-item.active{background:var(--brand-light);border-left:3px solid var(--brand)}
+.cust-panel{flex:1;padding:16px;overflow-y:auto}
+/* Misc */
+.section-title{font-size:15px;font-weight:700;margin-bottom:12px}
+.text-muted{color:var(--muted)}.text-sm{font-size:11px}.fw7{font-weight:700}
+.flex{display:flex}.items-c{align-items:center}.jc-between{justify-content:space-between}.gap-8{gap:8px}.gap-10{gap:10px}
+.mb-12{margin-bottom:12px}.mb-16{margin-bottom:16px}
+.hidden{display:none!important}
+.empty{text-align:center;padding:40px 20px;color:var(--muted)}
+.empty .ei{font-size:36px;margin-bottom:8px}
+::-webkit-scrollbar{width:4px;height:4px}
+::-webkit-scrollbar-track{background:transparent}
+::-webkit-scrollbar-thumb{background:#d1d5db;border-radius:10px}
+input[type=color]{height:36px;padding:2px;cursor:pointer}
+.dot{width:9px;height:9px;border-radius:50%;display:inline-block;flex-shrink:0}
+.map-placeholder{background:#e5e7eb;border-radius:var(--radius);display:flex;align-items:center;justify-content:center;flex-direction:column;gap:8px;color:var(--muted);font-size:13px}
+</style>
+</head>
+<body>
+<div class="app">
+<!-- SIDEBAR -->
+<nav class="sidebar">
+  <div class="sidebar-logo">
+    <span style="font-size:22px">⚔️</span>
+    <div><div class="logo-text">Rollo Services</div><div class="logo-sub">Field Management</div></div>
+  </div>
+  <div class="nav-group">
+    <div class="nav-link active" data-view="dashboard"><span class="ico">🏠</span>Dashboard</div>
+    <div class="nav-link" data-view="dispatch"><span class="ico">📡</span>Dispatch Board</div>
+    <div class="nav-label">Jobs</div>
+    <div class="nav-link" data-view="jobs"><span class="ico">🔧</span>All Jobs <span class="nb" id="sn-jobs">0</span></div>
+    <div class="nav-link" data-view="jobs" data-status="Quote"><span class="ndot" style="background:#9ca3af"></span>Quotes</div>
+    <div class="nav-link" data-view="jobs" data-status="Work Order"><span class="ndot" style="background:#3b82f6"></span>Work Orders</div>
+    <div class="nav-link" data-view="jobs" data-status="In Progress"><span class="ndot" style="background:#f59e0b"></span>In Progress</div>
+    <div class="nav-link" data-view="jobs" data-status="Completed"><span class="ndot" style="background:#10b981"></span>Completed</div>
+    <div class="nav-label">Management</div>
+    <div class="nav-link" data-view="customers"><span class="ico">👥</span>Customers</div>
+    <div class="nav-link" data-view="invoices"><span class="ico">💰</span>Invoices <span class="nb" id="sn-inv">0</span></div>
+    <div class="nav-link" data-view="staff"><span class="ico">👤</span>Staff</div>
+    <div class="nav-link" data-view="reports"><span class="ico">📊</span>Reports</div>
+    <div class="nav-link" data-view="settings"><span class="ico">⚙️</span>Settings</div>
+  </div>
+  <a class="sidebar-back" href="http://localhost:8741" target="_blank">← Rollo Ops Hub</a>
+</nav>
+<!-- MAIN -->
+<div class="main">
+  <div class="topbar">
+    <div class="topbar-title" id="topbar-title">Dashboard</div>
+    <div class="search-box"><span style="color:var(--muted)">🔍</span><input id="global-search" type="text" placeholder="Search jobs, customers…"/></div>
+    <button class="btn btn-brand" id="btn-new-job">＋ New Job</button>
+    <button class="btn btn-outline btn-sm" id="btn-new-customer">＋ Customer</button>
+    <div class="av av-lg" id="user-av" style="background:var(--brand);cursor:pointer" title="Trevor">T</div>
+  </div>
+  <div class="content" id="content"></div>
+</div>
+</div>
+
+<!-- ROLLO CHAT -->
+<button class="chat-btn" id="chat-toggle-btn" title="Ask Rollo AI">⚔️</button>
+<div class="chat-panel hidden" id="chat-panel">
+  <div class="chat-head">
+    <div class="av av-md" style="background:linear-gradient(135deg,#a78bfa,#818cf8)">R</div>
+    <div class="chat-head-info"><h4>Rollo AI ⚔️</h4><p>Always online · Field Services Assistant</p></div>
+    <button class="chat-close" id="chat-close">✕</button>
+  </div>
+  <div class="chat-msgs" id="chat-msgs"></div>
+  <div class="chat-typing hidden" id="chat-typing">Rollo is typing…</div>
+  <div class="chat-input-row">
+    <input class="chat-input" id="chat-input" type="text" placeholder="Ask Rollo anything…"/>
+    <button class="chat-send" id="chat-send">➤</button>
+  </div>
+</div>
+
+<!-- MODALS -->
+<!-- Job Modal -->
+<div class="overlay hidden" id="modal-job">
+<div class="modal">
+  <div class="modal-head"><h2 id="mjob-title">New Job</h2><button class="modal-close" data-close="modal-job">✕</button></div>
+  <div class="modal-body">
+    <input type="hidden" id="mjob-id"/>
+    <div class="fg-row">
+      <div class="fg"><label>Customer *</label><select id="mjob-customer"><option value="">Select customer…</option></select></div>
+      <div class="fg"><label>Job Type *</label><select id="mjob-type"></select></div>
+    </div>
+    <div class="fg-row">
+      <div class="fg"><label>Status</label><select id="mjob-status">
+        <option>Quote</option><option>Work Order</option><option selected>Work Order</option><option>In Progress</option><option>Completed</option><option>Invoiced</option>
+      </select></div>
+      <div class="fg"><label>Assigned To</label><select id="mjob-staff"></select></div>
+    </div>
+    <div class="fg-row">
+      <div class="fg"><label>Scheduled Date</label><input type="date" id="mjob-date"/></div>
+      <div class="fg"><label>Time</label><input type="time" id="mjob-time" value="09:00"/></div>
+    </div>
+    <div class="fg-row">
+      <div class="fg"><label>Duration (mins)</label><input type="number" id="mjob-duration" value="60" min="30" step="30"/></div>
+      <div class="fg"><label>Amount (€)</label><input type="number" id="mjob-amount" placeholder="0.00" step="0.01"/></div>
+    </div>
+    <div class="fg"><label>Notes</label><textarea id="mjob-notes" placeholder="Job details, access info, special instructions…"></textarea></div>
+  </div>
+  <div class="modal-foot">
+    <button class="btn btn-danger btn-sm hidden" id="btn-del-job">🗑 Delete</button>
+    <button class="btn btn-outline" data-close="modal-job">Cancel</button>
+    <button class="btn btn-brand" id="btn-save-job">Save Job</button>
+  </div>
+</div>
+</div>
+<!-- Customer Modal -->
+<div class="overlay hidden" id="modal-customer">
+<div class="modal">
+  <div class="modal-head"><h2 id="mcust-title">New Customer</h2><button class="modal-close" data-close="modal-customer">✕</button></div>
+  <div class="modal-body">
+    <input type="hidden" id="mcust-id"/>
+    <div class="fg-row">
+      <div class="fg"><label>First Name *</label><input id="mcust-first" type="text" placeholder="John"/></div>
+      <div class="fg"><label>Last Name *</label><input id="mcust-last" type="text" placeholder="Murphy"/></div>
+    </div>
+    <div class="fg-row">
+      <div class="fg"><label>Phone *</label><input id="mcust-phone" type="tel" placeholder="087 000 0000"/></div>
+      <div class="fg"><label>Email</label><input id="mcust-email" type="email" placeholder="john@example.ie"/></div>
+    </div>
+    <div class="fg"><label>Address</label><input id="mcust-addr" type="text" placeholder="14 Main Street"/></div>
+    <div class="fg-row">
+      <div class="fg"><label>Suburb / Area</label><input id="mcust-suburb" type="text" placeholder="Dundrum"/></div>
+      <div class="fg"><label>Postcode</label><input id="mcust-post" type="text" placeholder="D14"/></div>
+    </div>
+    <div class="fg"><label>Notes</label><textarea id="mcust-notes" placeholder="Access codes, site notes, preferences…"></textarea></div>
+  </div>
+  <div class="modal-foot">
+    <button class="btn btn-danger btn-sm hidden" id="btn-del-cust">🗑 Delete</button>
+    <button class="btn btn-outline" data-close="modal-customer">Cancel</button>
+    <button class="btn btn-brand" id="btn-save-cust">Save Customer</button>
+  </div>
+</div>
+</div>
+<!-- Invoice Modal -->
+<div class="overlay hidden" id="modal-invoice">
+<div class="modal">
+  <div class="modal-head"><h2 id="minv-title">New Invoice</h2><button class="modal-close" data-close="modal-invoice">✕</button></div>
+  <div class="modal-body">
+    <input type="hidden" id="minv-id"/>
+    <div class="fg-row">
+      <div class="fg"><label>Job</label><select id="minv-job"><option value="">Select job…</option></select></div>
+      <div class="fg"><label>Customer</label><select id="minv-customer"><option value="">Select…</option></select></div>
+    </div>
+    <div class="fg-row">
+      <div class="fg"><label>Amount (€) *</label><input id="minv-amount" type="number" placeholder="0.00" step="0.01"/></div>
+      <div class="fg"><label>Due Date</label><input id="minv-due" type="date"/></div>
+    </div>
+    <div class="fg"><label>Description</label><textarea id="minv-desc" placeholder="Invoice description…"></textarea></div>
+    <div class="fg"><label>Status</label><select id="minv-status"><option>Draft</option><option>Sent</option><option>Paid</option><option>Overdue</option></select></div>
+  </div>
+  <div class="modal-foot">
+    <button class="btn btn-outline" data-close="modal-invoice">Cancel</button>
+    <button class="btn btn-brand" id="btn-save-inv">Save Invoice</button>
+  </div>
+</div>
+</div>
+<!-- Confirm Modal -->
+<div class="overlay hidden" id="modal-confirm">
+<div class="modal" style="max-width:380px">
+  <div class="modal-head"><h2>Confirm Delete</h2><button class="modal-close" data-close="modal-confirm">✕</button></div>
+  <div class="modal-body"><p id="confirm-msg" style="font-size:13px;line-height:1.5"></p></div>
+  <div class="modal-foot">
+    <button class="btn btn-outline" data-close="modal-confirm">Cancel</button>
+    <button class="btn btn-danger" id="btn-confirm-yes">Delete</button>
+  </div>
+</div>
+</div>
+
+<script>
+// ============================================================
+// CONSTANTS & DATA
+// ============================================================
+const JOB_TYPES = ['No Heat / No Hot Water','Boiler Service','Radiator Issue','Tap Issue','Shower Issue','General Plumbing','Electrical','Roofing','Security','Other'];
+const JOB_STATUSES = ['Quote','Work Order','In Progress','Completed','Invoiced'];
+const STATUS_PILL = {
+  'Quote':'pill-gray','Work Order':'pill-blue','In Progress':'pill-orange',
+  'Completed':'pill-green','Invoiced':'pill-purple'
+};
+const INV_PILL = {'Draft':'pill-gray','Sent':'pill-blue','Paid':'pill-green','Overdue':'pill-red'};
+const STAFF_LIST = [
+  {id:'trevor', name:'Trevor', role:'Owner',      color:'#4f46e5', initials:'TR'},
+  {id:'paula',  name:'Paula',  role:'Engineer',   color:'#db2777', initials:'PL'},
+  {id:'pamela', name:'Pamela', role:'Admin',      color:'#059669', initials:'PA'},
+  {id:'darren', name:'Darren', role:'Engineer',   color:'#f59e0b', initials:'DA'},
+  {id:'jonathan',name:'Jonathan',role:'Engineer', color:'#3b82f6', initials:'JO'},
+  {id:'lucas',  name:'Lucas',  role:'Engineer',   color:'#8b5cf6', initials:'LU'},
+  {id:'thomas', name:'Thomas', role:'Engineer',   color:'#ef4444', initials:'TH'},
+  {id:'william',name:'William',role:'Engineer',   color:'#0891b2', initials:'WI'},
+];
+const ROLLO_REPLIES = [
+  'Got it — I\'ve logged that for you ⚔️','On it! Job updated.','Noted. I\'ll keep an eye on that.',
+  'Great call. I\'ll add a reminder for the team.','Done! Anything else you need?',
+  'Understood. I\'ll prep the paperwork.','Smart move. I\'ll schedule a follow-up.',
+  'All sorted. Your team will be notified ⚔️',
+];
+const ROLLO_CONTEXT = {
+  dashboard:'Looking good on the dashboard! You have {live} live jobs today. Need me to run a quick summary?',
+  dispatch:'Dispatch board ready. I can help you optimise the schedule or flag any clashes.',
+  jobs:'Viewing all jobs. Want me to filter by priority or flag any overdue ones?',
+  customers:'Customer list loaded. I can pull job history for any customer instantly.',
+  invoices:'Invoice overview ready. I\'ll flag any overdue payments automatically.',
+  staff:'Team overview. Everyone looks busy today — want me to check workload balance?',
+  reports:'Reports ready. I can generate a PDF summary or highlight key trends.',
+  settings:'Settings panel. Let me know if you need help configuring anything.',
+};
+
+// ============================================================
+// DEFAULT DATA
+// ============================================================
+const defaultCustomers = [
+  {id:'C001',first:'Murphy',last:'Colm',phone:'086 111 2233',email:'colm.murphy@email.ie',address:'14 Beech Road',suburb:'Dundrum',post:'D14',notes:'Has 2 boilers. Side gate access.',createdAt:Date.now()-8640000},
+  {id:'C002',first:'O\'Brien',last:'Siobhan',phone:'087 234 5678',email:'siobhan@mail.ie',address:'7 Maple Avenue',suburb:'Rathfarnham',post:'D16',notes:'Ring ahead.',createdAt:Date.now()-7200000},
+  {id:'C003',first:'Kelly',last:'Declan',phone:'085 345 6789',email:'',address:'22 Oak Street',suburb:'Tallaght',post:'D24',notes:'',createdAt:Date.now()-86400000},
+  {id:'C004',first:'Walsh',last:'Fiona',phone:'087 456 7890',email:'fiona.walsh@email.ie',address:'3 Elm Grove',suburb:'Clonskeagh',post:'D14',notes:'Key in lockbox.',createdAt:Date.now()-172800000},
+  {id:'C005',first:'Ryan',last:'Patrick',phone:'086 567 8901',email:'pat.ryan@email.ie',address:'58 Chestnut Lane',suburb:'Glasnevin',post:'D11',notes:'Annual maintenance contract.',createdAt:Date.now()-259200000},
+  {id:'C006',first:'Byrne',last:'Catherine',phone:'087 678 9012',email:'cathy.b@email.ie',address:'12 Pine Close',suburb:'Ballsbridge',post:'D4',notes:'Prefer morning appointments.',createdAt:Date.now()-345600000},
+  {id:'C007',first:'Doyle',last:'Sean',phone:'083 789 0123',email:'',address:'9 Willow Way',suburb:'Stillorgan',post:'D18',notes:'',createdAt:Date.now()-432000000},
+  {id:'C008',first:'Connolly',last:'Mary',phone:'087 890 1234',email:'mary.c@email.ie',address:'34 Birch Place',suburb:'Portmarnock',post:'K78',notes:'Elderly. Call before arriving.',createdAt:Date.now()-518400000},
+  {id:'C009',first:'Fitzgerald',last:'James',phone:'086 901 2345',email:'james.fitz@email.ie',address:'1 Cedar Road',suburb:'Malahide',post:'K36',notes:'',createdAt:Date.now()-604800000},
+  {id:'C010',first:'Collins',last:'Anne',phone:'085 012 3456',email:'anne.c@email.ie',address:'76 Ash Drive',suburb:'Celbridge',post:'W23',notes:'Has a dog.',createdAt:Date.now()-691200000},
+  {id:'C011',first:'O\'Connor',last:'Tom',phone:'087 111 3344',email:'',address:'5 Hazel Court',suburb:'Maynooth',post:'W23',notes:'',createdAt:Date.now()-777600000},
+  {id:'C012',first:'Burke',last:'Louise',phone:'086 222 4455',email:'louise.b@email.ie',address:'19 Sycamore St',suburb:'Swords',post:'K67',notes:'Recurring boiler service — April/Oct.',createdAt:Date.now()-864000000},
+  {id:'C013',first:'Power',last:'Niall',phone:'087 333 5566',email:'',address:'44 Rowan Ave',suburb:'Blanchardstown',post:'D15',notes:'',createdAt:Date.now()-950400000},
+  {id:'C014',first:'Kane',last:'Olive',phone:'085 444 6677',email:'olive.kane@email.ie',address:'8 Larch Road',suburb:'Castleknock',post:'D15',notes:'Quarterly service contract.',createdAt:Date.now()-1036800000},
+  {id:'C015',first:'Colloton',last:'Tom',phone:'087 555 7788',email:'',address:'3 Spruce Lane',suburb:'Lucan',post:'K78',notes:'Annual April service.',createdAt:Date.now()-1123200000},
+];
+
+const today = new Date().toISOString().split('T')[0];
+const tom = new Date(Date.now()+86400000).toISOString().split('T')[0];
+const yes = new Date(Date.now()-86400000).toISOString().split('T')[0];
+
+const defaultJobs = [
+  {id:'J001',number:19440,type:'Boiler Service',status:'Completed',customerId:'C012',staffId:'trevor',scheduledDate:yes,scheduledTime:'09:00',duration:90,amount:150,notes:'Annual service. Completed OK.',createdAt:Date.now()-172800000},
+  {id:'J002',number:19441,type:'No Heat / No Hot Water',status:'Completed',customerId:'C005',staffId:'jonathan',scheduledDate:yes,scheduledTime:'11:00',duration:120,amount:220,notes:'Faulty pump replaced.',createdAt:Date.now()-172800000},
+  {id:'J003',number:19442,type:'Radiator Issue',status:'In Progress',customerId:'C001',staffId:'trevor',scheduledDate:today,scheduledTime:'09:00',duration:60,amount:180,notes:'2 radiators not heating. Check valves.',createdAt:Date.now()-86400000},
+  {id:'J004',number:19443,type:'Boiler Service',status:'Work Order',customerId:'C006',staffId:'paula',scheduledDate:today,scheduledTime:'10:00',duration:90,amount:150,notes:'Annual service due.',createdAt:Date.now()-86400000},
+  {id:'J005',number:19444,type:'Tap Issue',status:'Work Order',customerId:'C003',staffId:'darren',scheduledDate:today,scheduledTime:'13:00',duration:60,amount:120,notes:'Kitchen tap dripping.',createdAt:Date.now()-43200000},
+  {id:'J006',number:19445,type:'Shower Issue',status:'In Progress',customerId:'C007',staffId:'lucas',scheduledDate:today,scheduledTime:'11:00',duration:90,amount:160,notes:'Low pressure shower. Check pump.',createdAt:Date.now()-43200000},
+  {id:'J007',number:19446,type:'No Heat / No Hot Water',status:'Quote',customerId:'C011',staffId:'thomas',scheduledDate:tom,scheduledTime:'09:00',duration:120,amount:0,notes:'No heat throughout. Needs assessment.',createdAt:Date.now()-21600000},
+  {id:'J008',number:19447,type:'General Plumbing',status:'Work Order',customerId:'C013',staffId:'william',scheduledDate:tom,scheduledTime:'10:30',duration:60,amount:140,notes:'Burst pipe under sink.',createdAt:Date.now()-21600000},
+  {id:'J009',number:19448,type:'Boiler Service',status:'Quote',customerId:'C015',staffId:'pamela',scheduledDate:'',scheduledTime:'',duration:90,amount:0,notes:'Annual April service.',createdAt:Date.now()-3600000},
+  {id:'J010',number:19449,type:'Electrical',status:'Quote',customerId:'C002',staffId:'jonathan',scheduledDate:'',scheduledTime:'',duration:120,amount:0,notes:'Consumer unit upgrade.',createdAt:Date.now()-7200000},
+  {id:'J011',number:19450,type:'Radiator Issue',status:'Work Order',customerId:'C004',staffId:'darren',scheduledDate:today,scheduledTime:'14:00',duration:60,amount:140,notes:'TRV replacement.',createdAt:Date.now()-18000000},
+  {id:'J012',number:19451,type:'Boiler Service',status:'Invoiced',customerId:'C009',staffId:'trevor',scheduledDate:yes,scheduledTime:'14:00',duration:90,amount:175,notes:'Completed. Invoice sent.',createdAt:Date.now()-259200000},
+  {id:'J013',number:19452,type:'General Plumbing',status:'Completed',customerId:'C010',staffId:'paula',scheduledDate:yes,scheduledTime:'09:30',duration:120,amount:210,notes:'Full bathroom fit-out.',createdAt:Date.now()-345600000},
+  {id:'J014',number:19453,type:'Security',status:'Work Order',customerId:'C008',staffId:'pamela',scheduledDate:tom,scheduledTime:'13:00',duration:60,amount:130,notes:'Alarm annual check.',createdAt:Date.now()-14400000},
+  {id:'J015',number:19454,type:'Tap Issue',status:'Work Order',customerId:'C014',staffId:'william',scheduledDate:today,scheduledTime:'15:00',duration:60,amount:110,notes:'Bathroom tap replacement.',createdAt:Date.now()-10800000},
+];
+
+const defaultInvoices = [
+  {id:'I001',number:'INV-0087',jobId:'J001',customerId:'C012',amount:150,status:'Paid',dueDate:yes,desc:'Annual boiler service',createdAt:Date.now()-172800000},
+  {id:'I002',number:'INV-0088',jobId:'J002',customerId:'C005',amount:220,status:'Paid',dueDate:yes,desc:'No heat — pump replacement',createdAt:Date.now()-172800000},
+  {id:'I003',number:'INV-0089',jobId:'J012',customerId:'C009',amount:175,status:'Sent',dueDate:tom,desc:'Boiler service',createdAt:Date.now()-86400000},
+  {id:'I004',number:'INV-0090',jobId:'J013',customerId:'C010',amount:210,status:'Overdue',dueDate:yes,desc:'Bathroom plumbing',createdAt:Date.now()-345600000},
+  {id:'I005',number:'INV-0091',jobId:'',customerId:'C006',amount:150,status:'Draft',dueDate:'',desc:'Boiler service',createdAt:Date.now()-3600000},
+];
+
+const defaultActivities = [
+  {author:'trevor',text:'Started radiator job #19442 — on site',time:'9:15 AM'},
+  {author:'rollo',text:'Reminder: 4 jobs scheduled for today',time:'8:00 AM'},
+  {author:'paula',text:'Boiler service #19443 — confirmed with customer',time:'9:30 AM'},
+  {author:'lucas',text:'En route to shower job #19446',time:'11:00 AM'},
+  {author:'rollo',text:'Invoice INV-0090 is overdue — flagging for follow-up ⚔️',time:'8:30 AM'},
+];
+
+// ============================================================
+// STATE
+// ============================================================
+const S = {
+  jobs:[], customers:[], invoices:[], activities:[],
+  view:'dashboard', dispatchDate: today,
+  filterStatus:'', filterStaff:'', searchQ:'',
+  activeCustId: null,
+  pendingDelete: null, pendingDeleteType: null,
+  chatMessages:[],
+
+  load(){
+    const ld=(k,d)=>{try{const v=localStorage.getItem(k);return v?JSON.parse(v):d}catch(e){return d}};
+    this.jobs       = ld('ros_jobs', defaultJobs);
+    this.customers  = ld('ros_customers', defaultCustomers);
+    this.invoices   = ld('ros_invoices', defaultInvoices);
+    this.activities = ld('ros_activities', defaultActivities);
+    this.chatMessages=ld('ros_chat',[{role:'rollo',text:'👋 Hey! I\'m Rollo — your AI field services assistant. I\'m connected to all your jobs, customers, and schedules. Ask me anything! ⚔️'}]);
+  },
+  save(){
+    try{
+      localStorage.setItem('ros_jobs', JSON.stringify(this.jobs));
+      localStorage.setItem('ros_customers', JSON.stringify(this.customers));
+      localStorage.setItem('ros_invoices', JSON.stringify(this.invoices));
+      localStorage.setItem('ros_activities', JSON.stringify(this.activities));
+      localStorage.setItem('ros_chat', JSON.stringify(this.chatMessages));
+      // Sync to Ops Hub
+      this.syncToOpsHub();
+    }catch(e){}
+  },
+  syncToOpsHub(){
+    const statusMap={'Quote':'quoted','Work Order':'scheduled','In Progress':'inprogress','Completed':'done','Invoiced':'done'};
+    const staffMap={'trevor':'trevor','paula':'paula','pamela':'pamela','darren':'trevor','jonathan':'trevor','lucas':'trevor','thomas':'trevor','william':'trevor'};
+    const mapped = this.jobs.map(j=>({
+      id:j.id, title:`${j.type} — #${j.number}`,
+      customer: this.getCustomerName(j.customerId),
+      type:j.type, status:statusMap[j.status]||'quoted',
+      assignee:staffMap[j.staffId]||'trevor',
+      dueDate:j.scheduledDate||today, priority:'med',
+      notes:j.notes||'', createdAt:j.createdAt||Date.now(),
+    }));
+    localStorage.setItem('roh_jobs', JSON.stringify(mapped));
+  },
+  addActivity(author,text){
+    const now=new Date().toLocaleTimeString('en-IE',{hour:'2-digit',minute:'2-digit'});
+    this.activities.unshift({author,text,time:now});
+    if(this.activities.length>30) this.activities=this.activities.slice(0,30);
+  },
+  getCustomerName(id){
+    const c=this.customers.find(c=>c.id===id);
+    return c?`${c.first} ${c.last}`:'Unknown';
+  },
+  getCustomerById(id){ return this.customers.find(c=>c.id===id)||null; },
+  getJobById(id){ return this.jobs.find(j=>j.id===id)||null; },
+  getStaff(id){ return STAFF_LIST.find(s=>s.id===id)||STAFF_LIST[0]; },
+  nextJobId(){ const ns=this.jobs.map(j=>parseInt(j.number)||0); return Math.max(19439,...ns)+1; },
+  nextInvNum(){ const ns=this.invoices.map(i=>parseInt((i.number||'0').replace(/\D/g,''))||0); return 'INV-'+String(Math.max(90,...ns)+1).padStart(4,'0'); },
+  liveJobs(){ return this.jobs.filter(j=>j.status!=='Completed'&&j.status!=='Invoiced').length; },
+  overdueInv(){ return this.invoices.filter(i=>i.status==='Overdue').length; },
+  todayRevenue(){
+    return this.invoices.filter(i=>i.status==='Paid').reduce((a,b)=>a+(b.amount||0),0);
+  },
+};
+
+// ============================================================
+// HELPERS
+// ============================================================
+function avEl(staffId,size='av-md'){
+  const s=STAFF_LIST.find(x=>x.id===staffId)||STAFF_LIST[0];
+  return `<div class="av ${size}" style="background:${s.color}" title="${s.name}">${s.initials[0]}</div>`;
+}
+function jobPill(status){ return `<span class="pill ${STATUS_PILL[status]||'pill-gray'}">${status}</span>`; }
+function invPill(status){ return `<span class="pill ${INV_PILL[status]||'pill-gray'}">${status}</span>`; }
+function fmtDate(ds){
+  if(!ds) return '—';
+  try{ const d=new Date(ds+'T00:00:00'); return d.toLocaleDateString('en-IE',{day:'numeric',month:'short',year:'numeric'}); }catch(e){ return ds; }
+}
+function uid(){ return 'id-'+Math.random().toString(36).slice(2); }
+function openModal(id){ document.getElementById(id).classList.remove('hidden'); }
+function closeModal(id){ document.getElementById(id).classList.add('hidden'); }
+function euro(n){ return '€'+parseFloat(n||0).toFixed(2); }
+
+// ============================================================
+// VIEWS
+// ============================================================
+function renderView(){
+  const ct=document.getElementById('content');
+  const tt=document.getElementById('topbar-title');
+  const views={
+    dashboard:()=>{tt.textContent='Dashboard'; ct.innerHTML=renderDashboard();setTimeout(drawDashCharts,50);},
+    dispatch:()=>{tt.textContent='Dispatch Board'; ct.style.padding='0'; ct.innerHTML=renderDispatch();initDispatch();},
+    jobs:()=>{tt.textContent='All Jobs'; ct.innerHTML=renderJobs();},
+    customers:()=>{tt.textContent='Customers'; ct.innerHTML=renderCustomers(); initCustomerList();},
+    invoices:()=>{tt.textContent='Invoices'; ct.innerHTML=renderInvoices();},
+    staff:()=>{tt.textContent='Staff'; ct.innerHTML=renderStaff();},
+    reports:()=>{tt.textContent='Reports'; ct.innerHTML=renderReports();setTimeout(drawReportCharts,50);},
+    settings:()=>{tt.textContent='Settings'; ct.innerHTML=renderSettings();},
+  };
+  if(S.view==='dispatch') ct.style.padding='0'; else ct.style.padding='16px';
+  (views[S.view]||views.dashboard)();
+  updateSidebarBadges();
+  // Rollo context msg
+  const ctx=ROLLO_CONTEXT[S.view]||'';
+  if(ctx){
+    const msg=ctx.replace('{live}',S.liveJobs());
+    if(!S.chatMessages.find(m=>m.text===msg)) S.chatMessages.push({role:'rollo',text:msg});
+  }
+}
+
+// ── Dashboard ──
+function renderDashboard(){
+  const todayJobs=S.jobs.filter(j=>j.scheduledDate===today).length;
+  const doneToday=S.jobs.filter(j=>j.scheduledDate===today&&j.status==='Completed').length;
+  const weekRev=S.invoices.filter(i=>i.status==='Paid').reduce((a,b)=>a+(b.amount||0),0);
+  const outstandingInv=S.invoices.filter(i=>i.status==='Sent'||i.status==='Overdue').reduce((a,b)=>a+(b.amount||0),0);
+  const staffWorkload=STAFF_LIST.map(s=>{
+    const cnt=S.jobs.filter(j=>j.staffId===s.id&&j.scheduledDate===today).length;
+    return `<div style="text-align:center;padding:8px;background:var(--card);border:1px solid var(--border);border-radius:var(--radius)">
+      <div class="av av-md" style="background:${s.color};margin:0 auto 4px">${s.initials[0]}</div>
+      <div style="font-size:11px;font-weight:700">${s.name}</div>
+      <div style="font-size:18px;font-weight:800;color:${s.color}">${cnt}</div>
+      <div style="font-size:10px;color:var(--muted)">jobs today</div>
+    </div>`;
+  }).join('');
+  const acts=S.activities.slice(0,5).map(a=>{
+    const st=STAFF_LIST.find(s=>s.id===a.author)||{name:a.author,color:'#7c3aed',initials:'R'};
+    return `<div class="act-item">
+      <div class="av av-md" style="background:${st.color}">${st.initials[0]}</div>
+      <div class="act-body"><div class="act-name">${st.name}</div><div class="act-text">${a.text}</div></div>
+      <div class="act-time">${a.time}</div>
+    </div>`;
+  }).join('');
+  return `
+  <div class="stats-grid">
+    <div class="stat"><div class="stat-label">🔧 Today's Jobs</div><div class="stat-val" style="color:var(--brand2)">${todayJobs}</div><div class="stat-sub">${doneToday} completed</div></div>
+    <div class="stat"><div class="stat-label">✅ Live Jobs Total</div><div class="stat-val" style="color:var(--success)">${S.liveJobs()}</div><div class="stat-sub">across all staff</div></div>
+    <div class="stat"><div class="stat-label">💰 Revenue (Paid)</div><div class="stat-val" style="color:var(--brand)">${euro(weekRev)}</div><div class="stat-sub">all time</div></div>
+    <div class="stat"><div class="stat-label">📄 Outstanding</div><div class="stat-val" style="color:${S.overdueInv()>0?'var(--danger)':'var(--text)'}">${euro(outstandingInv)}</div><div class="stat-sub">${S.overdueInv()} overdue</div></div>
+  </div>
+  <div class="row" style="margin-bottom:14px">
+    <div class="col card">
+      <div class="card-header"><div class="card-title">📅 Today's Schedule</div><button class="btn btn-brand btn-sm" onclick="switchView('dispatch')">Open Dispatch</button></div>
+      <div class="card-body">${S.jobs.filter(j=>j.scheduledDate===today).length===0?'<div class="empty"><div class="ei">📅</div>No jobs scheduled today</div>':
+        S.jobs.filter(j=>j.scheduledDate===today).map(j=>`
+          <div style="display:flex;gap:10px;align-items:center;padding:8px 0;border-bottom:1px solid var(--border)" onclick="editJob('${j.id}')" style="cursor:pointer">
+            <div style="font-size:11px;color:var(--muted);width:40px;flex-shrink:0">${j.scheduledTime||'--:--'}</div>
+            ${avEl(j.staffId,'av-sm')}
+            <div style="flex:1"><div style="font-weight:700;font-size:12px">${j.type}</div><div style="font-size:11px;color:var(--muted)">${S.getCustomerName(j.customerId)}</div></div>
+            ${jobPill(j.status)}
+          </div>`).join('')}
+      </div>
+    </div>
+    <div class="col card">
+      <div class="card-header"><div class="card-title">📣 Activity Feed</div></div>
+      <div class="card-body">${acts||'<div class="empty">No activity yet</div>'}</div>
+    </div>
+  </div>
+  <div class="card mb-12">
+    <div class="card-header"><div class="card-title">👥 Staff Workload — Today</div></div>
+    <div class="card-body"><div style="display:grid;grid-template-columns:repeat(8,1fr);gap:8px">${staffWorkload}</div></div>
+  </div>
+  <div class="row">
+    <div class="col card">
+      <div class="card-header"><div class="card-title">📊 Jobs by Type</div></div>
+      <div class="card-body"><canvas id="chart-type" class="chart-canvas" height="180"></canvas></div>
+    </div>
+    <div class="col card">
+      <div class="card-header"><div class="card-title">💰 Revenue (Last 6 Months)</div></div>
+      <div class="card-body"><canvas id="chart-rev" class="chart-canvas" height="180"></canvas></div>
+    </div>
+  </div>`;
+}
+
+// ── Dispatch Board ──
+function renderDispatch(){
+  const dd=new Date(S.dispatchDate+'T00:00:00');
+  const dLabel=dd.toLocaleDateString('en-IE',{weekday:'long',day:'numeric',month:'long'});
+  const slots=[];
+  for(let h=8;h<=17;h++) for(let m=0;m<60;m+=30) slots.push({h,m,label:m===0?`${h}:00`:`${h}:30`,isHour:m===0});
+  // Queue jobs (unscheduled or not today)
+  const queueJobs=S.jobs.filter(j=>!j.scheduledDate||j.scheduledDate!==S.dispatchDate);
+  const todayJobs=S.jobs.filter(j=>j.scheduledDate===S.dispatchDate);
+  const queueHTML=`
+    <div class="queue-section">
+      <div class="queue-head"><span>📋 Unscheduled</span><span class="queue-count">${queueJobs.filter(j=>j.status==='Quote'||j.status==='Work Order').length}</span></div>
+      <div class="queue-body" id="q-unscheduled" ondragover="event.preventDefault()" ondrop="dropToQueue(event)">
+        ${queueJobs.filter(j=>j.status==='Quote'||j.status==='Work Order').map(j=>qCardHTML(j)).join('')}
+      </div>
+    </div>
+    <div class="queue-section">
+      <div class="queue-head"><span>📞 Call to Book</span><span class="queue-count">${queueJobs.filter(j=>j.status==='Quote').length}</span></div>
+      <div class="queue-body">
+        ${queueJobs.filter(j=>j.status==='Quote').map(j=>qCardHTML(j)).join('')}
+      </div>
+    </div>`;
+  const staffHeaders=STAFF_LIST.map(s=>{
+    const cnt=todayJobs.filter(j=>j.staffId===s.id).length;
+    return `<div class="dg-staff-col" style="border-bottom:2px solid ${s.color}20">
+      <div class="av av-md" style="background:${s.color};margin:0 auto 3px">${s.initials[0]}</div>
+      <div class="dg-staff-name">${s.name}</div>
+      <div class="dg-staff-count">${cnt} job${cnt!==1?'s':''}</div>
+    </div>`;
+  }).join('');
+  const timeSlotRows=slots.map((sl,idx)=>{
+    const lanes=STAFF_LIST.map(s=>`
+      <div class="dg-lane">
+        <div class="dg-cell${sl.isHour?' hour':''}" data-staff="${s.id}" data-slot="${sl.h}:${String(sl.m).padStart(2,'0')}"
+          ondragover="event.preventDefault();this.classList.add('drag-over')"
+          ondragleave="this.classList.remove('drag-over')"
+          ondrop="dropToSlot(event,'${s.id}','${String(sl.h).padStart(2,'0')}:${String(sl.m).padStart(2,'0')}')">
+        </div>
+      </div>`).join('');
+    return `<div style="display:flex">
+      <div class="dg-time-slot${sl.isHour?' hour':''}">${sl.label}</div>
+      ${lanes}
+    </div>`;
+  }).join('');
+  // Place job blocks
+  const jobBlocks=todayJobs.map(j=>{
+    if(!j.scheduledTime) return '';
+    const [hh,mm]=j.scheduledTime.split(':').map(Number);
+    const staffIdx=STAFF_LIST.findIndex(s=>s.id===j.staffId);
+    if(staffIdx<0) return '';
+    const topOffset=((hh-8)*60+mm)/30*40;
+    const height=Math.max(40,(j.duration||60)/30*40-4);
+    const left=60+staffIdx*160+4;
+    const statusColors={'Quote':'#9ca3af','Work Order':'#3b82f6','In Progress':'#f59e0b','Completed':'#10b981','Invoiced':'#8b5cf6'};
+    const bg=statusColors[j.status]||'#6b7280';
+    return `<div class="dg-job-block" style="top:${topOffset}px;height:${height}px;left:${left}px;width:152px;background:${bg}20;border-left:3px solid ${bg}"
+      draggable="true" data-job-id="${j.id}" ondragstart="onDragJob(event,'${j.id}')" onclick="editJob('${j.id}')">
+      <div class="dg-job-num">#${j.number}</div>
+      <div class="dg-job-title" style="color:${bg}">${S.getCustomerName(j.customerId)}</div>
+      <div class="dg-job-type">${j.type}</div>
+    </div>`;
+  }).join('');
+  return `
+  <div style="background:var(--card);border-bottom:1px solid var(--border);padding:10px 16px;display:flex;align-items:center;gap:10px;flex-shrink:0">
+    <button class="btn btn-outline btn-sm" onclick="changeDispatchDate(-1)">◀ Prev</button>
+    <button class="btn btn-outline btn-sm" onclick="changeDispatchDate(0)">Today</button>
+    <button class="btn btn-outline btn-sm" onclick="changeDispatchDate(1)">Next ▶</button>
+    <span style="font-size:14px;font-weight:700;margin-left:8px">${dLabel}</span>
+    <div style="margin-left:auto;display:flex;gap:8px">
+      <button class="btn btn-brand btn-sm" onclick="openJobModal()">＋ New Job</button>
+    </div>
+  </div>
+  <div class="dispatch-wrap">
+    <div class="queue-panel"><div style="padding:10px 12px;font-size:12px;font-weight:700;border-bottom:1px solid var(--border);background:var(--bg)">📋 Job Queues</div>${queueHTML}</div>
+    <div class="grid-area">
+      <div style="position:relative">
+        <div class="dg-header">
+          <div class="dg-time-col" style="padding:8px 4px;font-size:10px;color:var(--muted);text-align:center">TIME</div>
+          ${staffHeaders}
+        </div>
+        <div style="position:relative">
+          ${timeSlotRows}
+          ${jobBlocks}
+        </div>
+      </div>
+    </div>
+  </div>`;
+}
+
+function qCardHTML(j){
+  const st=S.getStaff(j.staffId);
+  return `<div class="q-card" draggable="true" data-job-id="${j.id}" ondragstart="onDragJob(event,'${j.id}')" onclick="editJob('${j.id}')">
+    <div class="q-job-num">#${j.number}</div>
+    <div class="q-customer">${S.getCustomerName(j.customerId)}</div>
+    <div class="q-type">${j.type} · ${st.name}</div>
+  </div>`;
+}
+
+// ── Jobs ──
+function renderJobs(){
+  let jobs=[...S.jobs];
+  const q=(document.getElementById('global-search')||{}).value?.toLowerCase()||S.searchQ||'';
+  if(S.filterStatus) jobs=jobs.filter(j=>j.status===S.filterStatus);
+  if(q) jobs=jobs.filter(j=>String(j.number).includes(q)||j.type.toLowerCase().includes(q)||S.getCustomerName(j.customerId).toLowerCase().includes(q));
+  return `
+  <div class="flex items-c jc-between mb-12">
+    <div>
+      <div style="font-size:15px;font-weight:700">All Jobs</div>
+      <div class="text-muted text-sm">${jobs.length} jobs ${S.filterStatus?'— '+S.filterStatus:''}</div>
+    </div>
+    <div class="flex gap-8">
+      <select onchange="S.filterStatus=this.value;renderView()" style="padding:6px 10px;border:1px solid var(--border);border-radius:var(--radius);font-size:12px">
+        <option value="">All Status</option>
+        ${JOB_STATUSES.map(s=>`<option value="${s}" ${S.filterStatus===s?'selected':''}>${s}</option>`).join('')}
+      </select>
+      <button class="btn btn-brand" onclick="openJobModal()">＋ New Job</button>
+    </div>
+  </div>
+  <div class="card" style="overflow:hidden">
+    <table class="tbl">
+      <thead><tr><th>Job #</th><th>Customer</th><th>Type</th><th>Status</th><th>Staff</th><th>Scheduled</th><th>Amount</th><th>Actions</th></tr></thead>
+      <tbody>
+        ${jobs.length===0?`<tr><td colspan="8"><div class="empty"><div class="ei">🔧</div>No jobs found</div></td></tr>`:
+        jobs.map(j=>`<tr onclick="editJob('${j.id}')">
+          <td style="font-family:monospace;font-weight:700">#${j.number}</td>
+          <td>${S.getCustomerName(j.customerId)}</td>
+          <td><span class="tag" style="background:#f3f4f6;color:#374151">${j.type}</span></td>
+          <td>${jobPill(j.status)}</td>
+          <td><div class="flex items-c gap-8">${avEl(j.staffId,'av-sm')} ${S.getStaff(j.staffId).name}</div></td>
+          <td>${j.scheduledDate?fmtDate(j.scheduledDate)+' '+j.scheduledTime:'—'}</td>
+          <td>${j.amount?euro(j.amount):'—'}</td>
+          <td onclick="event.stopPropagation()" style="white-space:nowrap">
+            <button class="btn btn-outline btn-xs" onclick="editJob('${j.id}')">Edit</button>
+            ${j.status==='Completed'?`<button class="btn btn-success btn-xs" onclick="genInvoice('${j.id}')">Invoice</button>`:''}
+          </td>
+        </tr>`).join('')}
+      </tbody>
+    </table>
+  </div>`;
+}
+
+// ── Customers ──
+function renderCustomers(){
+  const q=(document.getElementById('global-search')||{}).value?.toLowerCase()||'';
+  let custs=S.customers.filter(c=>!q||`${c.first} ${c.last} ${c.phone}`.toLowerCase().includes(q));
+  const listHTML=custs.map(c=>{
+    const jcount=S.jobs.filter(j=>j.customerId===c.id).length;
+    return `<div class="cust-list-item ${S.activeCustId===c.id?'active':''}" onclick="selectCust('${c.id}')">
+      <div style="font-weight:700;font-size:13px">${c.first} ${c.last}</div>
+      <div style="font-size:11px;color:var(--muted)">${c.phone} · ${jcount} job${jcount!==1?'s':''}</div>
+      <div style="font-size:11px;color:var(--muted)">${c.suburb}</div>
+    </div>`;
+  }).join('');
+  const selC=S.activeCustId?S.getCustomerById(S.activeCustId):null;
+  let panelHTML='<div class="empty" style="margin-top:80px"><div class="ei">👥</div>Select a customer to view details</div>';
+  if(selC){
+    const cJobs=S.jobs.filter(j=>j.customerId===selC.id);
+    panelHTML=`
+      <div class="flex items-c jc-between mb-16">
+        <div class="flex items-c gap-10">
+          <div class="av av-xl" style="background:var(--brand)">${selC.first[0]}</div>
+          <div><h2 style="font-size:17px">${selC.first} ${selC.last}</h2><div class="text-muted">${selC.suburb}</div></div>
+        </div>
+        <div class="flex gap-8">
+          <button class="btn btn-brand btn-sm" onclick="newJobForCust('${selC.id}')">＋ New Job</button>
+          <button class="btn btn-outline btn-sm" onclick="editCust('${selC.id}')">✏️ Edit</button>
+        </div>
+      </div>
+      <div class="grid-2 mb-16">
+        <div class="card"><div class="card-body">
+          <div class="text-sm text-muted mb-12">Contact</div>
+          <div style="font-size:13px;display:flex;flex-direction:column;gap:6px">
+            <div>📞 ${selC.phone}</div>
+            <div>✉️ ${selC.email||'—'}</div>
+            <div>📍 ${selC.address}, ${selC.suburb} ${selC.post}</div>
+          </div>
+        </div></div>
+        <div class="card"><div class="card-body">
+          <div class="text-sm text-muted mb-12">Notes</div>
+          <div style="font-size:12px;line-height:1.5">${selC.notes||'No notes.'}</div>
+        </div></div>
+      </div>
+      <div class="card"><div class="card-header"><div class="card-title">🔧 Job History (${cJobs.length})</div></div>
+        <table class="tbl"><thead><tr><th>Job #</th><th>Type</th><th>Status</th><th>Date</th><th>Amount</th></tr></thead>
+        <tbody>
+          ${cJobs.length===0?`<tr><td colspan="5" style="text-align:center;padding:20px;color:var(--muted)">No jobs yet</td></tr>`:
+          cJobs.map(j=>`<tr onclick="editJob('${j.id}')">
+            <td style="font-family:monospace">#${j.number}</td>
+            <td>${j.type}</td><td>${jobPill(j.status)}</td>
+            <td>${fmtDate(j.scheduledDate)}</td>
+            <td>${j.amount?euro(j.amount):'—'}</td>
+          </tr>`).join('')}
+        </tbody></table>
+      </div>`;
+  }
+  return `
+  <div class="flex items-c jc-between mb-12">
+    <div style="font-size:15px;font-weight:700">Customers <span style="font-size:13px;font-weight:400;color:var(--muted)">(${S.customers.length})</span></div>
+    <button class="btn btn-brand" onclick="openCustModal()">＋ New Customer</button>
+  </div>
+  <div class="card" style="display:flex;min-height:500px;overflow:hidden">
+    <div class="cust-list"><div style="padding:8px 12px;border-bottom:1px solid var(--border);background:var(--bg)">
+      <input style="width:100%;border:1px solid var(--border);border-radius:var(--radius);padding:6px 10px;font-size:12px;outline:none" placeholder="Search customers…" oninput="filterCusts(this.value)"/>
+    </div>${listHTML||'<div class="empty">No customers</div>'}</div>
+    <div class="cust-panel">${panelHTML}</div>
+  </div>`;
+}
+
+// ── Invoices ──
+function renderInvoices(){
+  const paid=S.invoices.filter(i=>i.status==='Paid').reduce((a,b)=>a+(b.amount||0),0);
+  const outstanding=S.invoices.filter(i=>i.status==='Sent'||i.status==='Overdue').reduce((a,b)=>a+(b.amount||0),0);
+  return `
+  <div class="stats-grid" style="grid-template-columns:repeat(4,1fr);margin-bottom:14px">
+    <div class="stat"><div class="stat-label">Total Paid</div><div class="stat-val" style="color:var(--success)">${euro(paid)}</div></div>
+    <div class="stat"><div class="stat-label">Outstanding</div><div class="stat-val" style="color:var(--warning)">${euro(outstanding)}</div></div>
+    <div class="stat"><div class="stat-label">Overdue</div><div class="stat-val" style="color:var(--danger)">${S.invoices.filter(i=>i.status==='Overdue').length}</div></div>
+    <div class="stat"><div class="stat-label">Total Invoices</div><div class="stat-val">${S.invoices.length}</div></div>
+  </div>
+  <div class="flex items-c jc-between mb-12">
+    <div style="font-size:15px;font-weight:700">Invoices</div>
+    <button class="btn btn-brand" onclick="openInvModal()">＋ New Invoice</button>
+  </div>
+  <div class="card" style="overflow:hidden">
+    <table class="tbl"><thead><tr><th>Invoice #</th><th>Customer</th><th>Job #</th><th>Amount</th><th>Status</th><th>Due</th><th>Actions</th></tr></thead>
+    <tbody>
+      ${S.invoices.length===0?`<tr><td colspan="7"><div class="empty"><div class="ei">💰</div>No invoices</div></td></tr>`:
+      S.invoices.map(i=>`<tr>
+        <td style="font-family:monospace;font-weight:700">${i.number}</td>
+        <td>${S.getCustomerName(i.customerId)}</td>
+        <td>${i.jobId?`#${(S.getJobById(i.jobId)||{}).number||'?'}`:'—'}</td>
+        <td style="font-weight:700">${euro(i.amount)}</td>
+        <td>${invPill(i.status)}</td>
+        <td style="${i.status==='Overdue'?'color:var(--danger);font-weight:700':''}">${fmtDate(i.dueDate)}</td>
+        <td style="white-space:nowrap;display:flex;gap:5px">
+          ${i.status==='Draft'?`<button class="btn btn-outline btn-xs" onclick="markInv('${i.id}','Sent')">Mark Sent</button>`:''}
+          ${i.status==='Sent'||i.status==='Overdue'?`<button class="btn btn-success btn-xs" onclick="markInv('${i.id}','Paid')">Mark Paid</button>`:''}
+          <button class="btn btn-ghost btn-xs" onclick="deleteInv('${i.id}')">✕</button>
+        </td>
+      </tr>`).join('')}
+    </tbody></table>
+  </div>`;
+}
+
+// ── Staff ──
+function renderStaff(){
+  return `
+  <div style="font-size:15px;font-weight:700;margin-bottom:14px">Staff Team (${STAFF_LIST.length})</div>
+  <div class="staff-grid">
+    ${STAFF_LIST.map(s=>{
+      const todayCount=S.jobs.filter(j=>j.staffId===s.id&&j.scheduledDate===today).length;
+      const weekCount=S.jobs.filter(j=>j.staffId===s.id).length;
+      const onJob=S.jobs.some(j=>j.staffId===s.id&&j.scheduledDate===today&&j.status==='In Progress');
+      return `<div class="staff-card" onclick="">
+        <div class="staff-card-top">
+          <div class="av av-xl" style="background:${s.color}">${s.initials[0]}</div>
+          <div class="staff-info">
+            <h3>${s.name}</h3>
+            <p>${s.role}</p>
+            <div style="display:flex;align-items:center;gap:5px;margin-top:4px">
+              <div style="width:8px;height:8px;border-radius:50%;background:${onJob?'var(--warning)':todayCount>0?'var(--success)':'#9ca3af'}"></div>
+              <span style="font-size:10px;color:var(--muted)">${onJob?'On Job':todayCount>0?'Working':'Available'}</span>
+            </div>
+          </div>
+        </div>
+        <div class="staff-stats">
+          <div class="staff-stat"><div class="staff-stat-val" style="color:${s.color}">${todayCount}</div><div class="staff-stat-lab">Today</div></div>
+          <div class="staff-stat"><div class="staff-stat-val" style="color:${s.color}">${weekCount}</div><div class="staff-stat-lab">Total Jobs</div></div>
+        </div>
+        <div style="margin-top:10px;display:flex;gap:6px">
+          ${S.jobs.filter(j=>j.staffId===s.id&&j.scheduledDate===today).slice(0,2).map(j=>`
+            <div style="flex:1;background:var(--bg);border-radius:5px;padding:5px 8px;font-size:10px">
+              <div style="font-weight:700">${j.type.split(' ')[0]}</div>
+              <div style="color:var(--muted)">${j.scheduledTime||'—'}</div>
+            </div>`).join('')||'<div style="font-size:11px;color:var(--muted)">No jobs today</div>'}
+        </div>
+      </div>`;
+    }).join('')}
+  </div>`;
+}
+
+// ── Reports ──
+function renderReports(){
+  return `
+  <div style="font-size:15px;font-weight:700;margin-bottom:14px">Reports & Analytics</div>
+  <div class="grid-2 mb-12">
+    <div class="card"><div class="card-header"><div class="card-title">📊 Jobs by Type</div></div>
+      <div class="card-body"><canvas id="rpt-type" class="chart-canvas" height="200"></canvas></div></div>
+    <div class="card"><div class="card-header"><div class="card-title">👥 Jobs by Staff</div></div>
+      <div class="card-body"><canvas id="rpt-staff" class="chart-canvas" height="200"></canvas></div></div>
+  </div>
+  <div class="grid-2">
+    <div class="card"><div class="card-header"><div class="card-title">💰 Revenue by Month</div></div>
+      <div class="card-body"><canvas id="rpt-rev" class="chart-canvas" height="200"></canvas></div></div>
+    <div class="card"><div class="card-header"><div class="card-title">✅ Job Status Breakdown</div></div>
+      <div class="card-body"><canvas id="rpt-status" class="chart-canvas" height="200"></canvas></div></div>
+  </div>`;
+}
+
+// ── Settings ──
+function renderSettings(){
+  return `
+  <div style="font-size:15px;font-weight:700;margin-bottom:14px">Settings</div>
+  <div class="grid-2">
+    <div class="card"><div class="card-header"><div class="card-title">🏢 Company Details</div></div>
+      <div class="card-body">
+        <div class="fg"><label>Company Name</label><input type="text" id="set-company" value="Rollo Field Services" /></div>
+        <div class="fg"><label>Phone</label><input type="text" id="set-phone" placeholder="01 000 0000" /></div>
+        <div class="fg"><label>Address</label><input type="text" id="set-addr" placeholder="Dublin, Ireland" /></div>
+        <div class="fg"><label>Email</label><input type="email" id="set-email" placeholder="office@example.ie" /></div>
+        <button class="btn btn-brand btn-sm" onclick="saveSettings()">Save Settings</button>
+      </div>
+    </div>
+    <div class="card"><div class="card-header"><div class="card-title">🔧 Job Types</div></div>
+      <div class="card-body">
+        ${JOB_TYPES.map(t=>`<div style="display:flex;align-items:center;gap:8px;padding:6px 0;border-bottom:1px solid var(--border)">
+          <span style="flex:1;font-size:12px">${t}</span>
+        </div>`).join('')}
+      </div>
+    </div>
+    <div class="card"><div class="card-header"><div class="card-title">👥 Staff</div></div>
+      <div class="card-body">
+        ${STAFF_LIST.map(s=>`<div style="display:flex;align-items:center;gap:10px;padding:7px 0;border-bottom:1px solid var(--border)">
+          <div class="av av-md" style="background:${s.color}">${s.initials[0]}</div>
+          <div style="flex:1"><div style="font-weight:700;font-size:12px">${s.name}</div><div style="font-size:11px;color:var(--muted)">${s.role}</div></div>
+          <div style="width:24px;height:24px;border-radius:4px;background:${s.color};border:2px solid var(--border)"></div>
+        </div>`).join('')}
+      </div>
+    </div>
+    <div class="card"><div class="card-header"><div class="card-title">🔗 Connections</div></div>
+      <div class="card-body">
+        <div style="display:flex;align-items:center;gap:10px;padding:10px;background:var(--bg);border-radius:var(--radius);margin-bottom:10px">
+          <span style="font-size:20px">⚔️</span>
+          <div style="flex:1"><div style="font-weight:700;font-size:12px">Rollo Ops Hub</div><div style="font-size:11px;color:var(--muted)">localhost:8741 · Jobs synced automatically</div></div>
+          <span class="pill pill-green">✅ Connected</span>
+        </div>
+        <div style="font-size:11px;color:var(--muted)">ServiceM8 API integration ready — add your API key to connect live data.</div>
+        <div class="fg" style="margin-top:12px"><label>ServiceM8 API Key</label><input type="password" placeholder="Paste your API key here…"/></div>
+        <button class="btn btn-brand btn-sm">Connect ServiceM8</button>
+      </div>
+    </div>
+  </div>`;
+}
+
+// ============================================================
+// CHARTS
+// ============================================================
+function drawBar(id,labels,data,colors){
+  const canvas=document.getElementById(id); if(!canvas) return;
+  const W=canvas.offsetWidth||300; const H=parseInt(canvas.getAttribute('height'))||180;
+  canvas.width=W; canvas.height=H;
+  const ctx=canvas.getContext('2d');
+  ctx.clearRect(0,0,W,H);
+  const max=Math.max(...data,1); const bw=Math.min(40,(W/data.length)-8);
+  const gw=W/data.length;
+  [.25,.5,.75,1].forEach(f=>{ctx.beginPath();ctx.strokeStyle='#f3f4f6';ctx.lineWidth=1;ctx.moveTo(0,H*f);ctx.lineTo(W,H*f);ctx.stroke()});
+  data.forEach((v,i)=>{
+    const bh=(v/max)*(H-24); const x=i*gw+(gw-bw)/2; const y=H-bh-4;
+    ctx.fillStyle=Array.isArray(colors)?colors[i%colors.length]:colors;
+    ctx.beginPath();ctx.roundRect(x,y,bw,bh,3);ctx.fill();
+    ctx.fillStyle='#6b7280';ctx.font='10px system-ui';ctx.textAlign='center';
+    ctx.fillText(labels[i].substring(0,8),x+bw/2,H);
+    if(v>0){ctx.fillStyle='#111827';ctx.fillText(v,x+bw/2,y-4);}
+  });
+}
+function drawDonut(id,labels,data,colors){
+  const canvas=document.getElementById(id); if(!canvas) return;
+  const W=canvas.offsetWidth||300; const H=parseInt(canvas.getAttribute('height'))||180;
+  canvas.width=W; canvas.height=H;
+  const ctx=canvas.getContext('2d');
+  ctx.clearRect(0,0,W,H);
+  const total=data.reduce((a,b)=>a+b,0)||1;
+  const cx=H/2; const cy=H/2; const r=H/2-10; const ir=H/4;
+  let angle=-Math.PI/2;
+  data.forEach((v,i)=>{
+    const slice=(v/total)*Math.PI*2;
+    ctx.beginPath();ctx.moveTo(cx,cy);ctx.arc(cx,cy,r,angle,angle+slice);ctx.closePath();
+    ctx.fillStyle=colors[i%colors.length];ctx.fill();
+    angle+=slice;
+  });
+  ctx.beginPath();ctx.arc(cx,cy,ir,0,Math.PI*2);ctx.fillStyle='#fff';ctx.fill();
+  // Legend
+  const lx=H+16; let ly=16;
+  labels.forEach((l,i)=>{
+    if(data[i]===0) return;
+    ctx.fillStyle=colors[i%colors.length];ctx.fillRect(lx,ly,10,10);
+    ctx.fillStyle='#374151';ctx.font='11px system-ui';ctx.textAlign='left';
+    ctx.fillText(`${l}: ${data[i]}`,lx+14,ly+9);
+    ly+=16;
+  });
+}
+function drawLine(id,labels,data,color){
+  const canvas=document.getElementById(id); if(!canvas) return;
+  const W=canvas.offsetWidth||300; const H=parseInt(canvas.getAttribute('height'))||180;
+  canvas.width=W; canvas.height=H;
+  const ctx=canvas.getContext('2d');
+  ctx.clearRect(0,0,W,H);
+  const max=Math.max(...data,1);
+  [.25,.5,.75,1].forEach(f=>{ctx.beginPath();ctx.strokeStyle='#f3f4f6';ctx.lineWidth=1;ctx.moveTo(0,H*f);ctx.lineTo(W,H*f);ctx.stroke()});
+  const pts=data.map((v,i)=>[i*(W/(data.length-1||1)),H-8-(v/max)*(H-16)]);
+  ctx.beginPath();ctx.moveTo(pts[0][0],H);
+  pts.forEach(p=>ctx.lineTo(p[0],p[1]));
+  ctx.lineTo(pts[pts.length-1][0],H);ctx.closePath();
+  ctx.fillStyle=color+'22';ctx.fill();
+  ctx.beginPath();pts.forEach((p,i)=>i===0?ctx.moveTo(p[0],p[1]):ctx.lineTo(p[0],p[1]));
+  ctx.strokeStyle=color;ctx.lineWidth=2;ctx.lineJoin='round';ctx.stroke();
+  pts.forEach(p=>{ctx.beginPath();ctx.arc(p[0],p[1],3,0,Math.PI*2);ctx.fillStyle=color;ctx.fill();ctx.strokeStyle='#fff';ctx.lineWidth=1.5;ctx.stroke()});
+  ctx.fillStyle='#6b7280';ctx.font='10px system-ui';ctx.textAlign='center';
+  labels.forEach((l,i)=>ctx.fillText(l,pts[i][0],H));
+}
+
+function drawDashCharts(){
+  const byType={};
+  JOB_TYPES.forEach(t=>byType[t]=0);
+  S.jobs.forEach(j=>byType[j.type]=(byType[j.type]||0)+1);
+  const typeColors=['#7c3aed','#4f46e5','#3b82f6','#06b6d4','#10b981','#f59e0b','#ef4444','#8b5cf6','#ec4899','#6366f1'];
+  drawBar('chart-type',Object.keys(byType),Object.values(byType),typeColors);
+  drawLine('chart-rev',['Oct','Nov','Dec','Jan','Feb','Mar'],[320,480,520,410,690,755],'#7c3aed');
+}
+function drawReportCharts(){
+  const byType={};
+  S.jobs.forEach(j=>byType[j.type]=(byType[j.type]||0)+1);
+  const typeColors=['#7c3aed','#4f46e5','#3b82f6','#06b6d4','#10b981','#f59e0b','#ef4444','#8b5cf6','#ec4899','#6366f1'];
+  drawDonut('rpt-type',Object.keys(byType),Object.values(byType),typeColors);
+  const staffCounts=STAFF_LIST.map(s=>S.jobs.filter(j=>j.staffId===s.id).length);
+  drawBar('rpt-staff',STAFF_LIST.map(s=>s.name),staffCounts,STAFF_LIST.map(s=>s.color));
+  drawLine('rpt-rev',['Oct','Nov','Dec','Jan','Feb','Mar'],[3200,4800,5200,4100,6900,7550],'#7c3aed');
+  const statuses=JOB_STATUSES.map(s=>S.jobs.filter(j=>j.status===s).length);
+  drawBar('rpt-status',JOB_STATUSES,statuses,['#9ca3af','#3b82f6','#f59e0b','#10b981','#8b5cf6']);
+}
+
+// ============================================================
+// DISPATCH INTERACTIONS
+// ============================================================
+let _dragJobId=null;
+function onDragJob(e,id){ _dragJobId=id; }
+function dropToSlot(e,staffId,time){
+  e.preventDefault();
+  e.currentTarget.classList.remove('drag-over');
+  if(!_dragJobId) return;
+  const j=S.jobs.find(j=>j.id===_dragJobId);
+  if(j){ j.staffId=staffId; j.scheduledDate=S.dispatchDate; j.scheduledTime=time;
+    S.addActivity(staffId,`Scheduled #${j.number} at ${time}`);
+    S.save(); renderView(); }
+  _dragJobId=null;
+}
+function dropToQueue(e){
+  e.preventDefault();
+  if(!_dragJobId) return;
+  const j=S.jobs.find(j=>j.id===_dragJobId);
+  if(j){ j.scheduledDate=''; j.scheduledTime=''; S.save(); renderView(); }
+  _dragJobId=null;
+}
+function changeDispatchDate(delta){
+  if(delta===0){ S.dispatchDate=today; }
+  else{
+    const d=new Date(S.dispatchDate+'T00:00:00');
+    d.setDate(d.getDate()+delta);
+    S.dispatchDate=d.toISOString().split('T')[0];
+  }
+  renderView();
+}
+function initDispatch(){}
+
+// ============================================================
+// MODALS
+// ============================================================
+function populateJobModal(){
+  const custSel=document.getElementById('mjob-customer');
+  custSel.innerHTML='<option value="">Select customer…</option>'+
+    S.customers.map(c=>`<option value="${c.id}">${c.first} ${c.last}</option>`).join('');
+  const typeEl=document.getElementById('mjob-type');
+  typeEl.innerHTML=JOB_TYPES.map(t=>`<option>${t}</option>`).join('');
+  const staffEl=document.getElementById('mjob-staff');
+  staffEl.innerHTML=STAFF_LIST.map(s=>`<option value="${s.id}">${s.name}</option>`).join('');
+}
+function openJobModal(prefillCustId=null, prefillStatus=null){
+  populateJobModal();
+  document.getElementById('mjob-id').value='';
+  document.getElementById('mjob-title').textContent='New Job';
+  document.getElementById('mjob-customer').value=prefillCustId||'';
+  document.getElementById('mjob-type').value=JOB_TYPES[0];
+  document.getElementById('mjob-status').value=prefillStatus||'Work Order';
+  document.getElementById('mjob-staff').value='trevor';
+  document.getElementById('mjob-date').value=today;
+  document.getElementById('mjob-time').value='09:00';
+  document.getElementById('mjob-duration').value='60';
+  document.getElementById('mjob-amount').value='';
+  document.getElementById('mjob-notes').value='';
+  document.getElementById('btn-del-job').classList.add('hidden');
+  openModal('modal-job');
+}
+function editJob(id){
+  const j=S.jobs.find(j=>j.id===id); if(!j) return;
+  populateJobModal();
+  document.getElementById('mjob-id').value=j.id;
+  document.getElementById('mjob-title').textContent=`Edit Job #${j.number}`;
+  document.getElementById('mjob-customer').value=j.customerId||'';
+  document.getElementById('mjob-type').value=j.type;
+  document.getElementById('mjob-status').value=j.status;
+  document.getElementById('mjob-staff').value=j.staffId;
+  document.getElementById('mjob-date').value=j.scheduledDate||'';
+  document.getElementById('mjob-time').value=j.scheduledTime||'09:00';
+  document.getElementById('mjob-duration').value=j.duration||60;
+  document.getElementById('mjob-amount').value=j.amount||'';
+  document.getElementById('mjob-notes').value=j.notes||'';
+  document.getElementById('btn-del-job').classList.remove('hidden');
+  openModal('modal-job');
+}
+function saveJob(){
+  const id=document.getElementById('mjob-id').value;
+  const custId=document.getElementById('mjob-customer').value;
+  if(!custId){ alert('Please select a customer'); return; }
+  const data={
+    customerId:custId,
+    type:document.getElementById('mjob-type').value,
+    status:document.getElementById('mjob-status').value,
+    staffId:document.getElementById('mjob-staff').value,
+    scheduledDate:document.getElementById('mjob-date').value,
+    scheduledTime:document.getElementById('mjob-time').value,
+    duration:parseInt(document.getElementById('mjob-duration').value)||60,
+    amount:parseFloat(document.getElementById('mjob-amount').value)||0,
+    notes:document.getElementById('mjob-notes').value,
+  };
+  if(id){
+    Object.assign(S.jobs.find(j=>j.id===id),data);
+    S.addActivity('trevor',`Updated job #${S.jobs.find(j=>j.id===id)?.number}`);
+  } else {
+    const newJob={id:uid(),number:S.nextJobId(),...data,createdAt:Date.now()};
+    S.jobs.unshift(newJob);
+    S.addActivity('trevor',`Created new job #${newJob.number} — ${data.type}`);
+  }
+  S.save(); closeModal('modal-job'); renderView(); S.filterStatus='';
+}
+function deleteJob(){
+  const id=document.getElementById('mjob-id').value;
+  const j=S.jobs.find(j=>j.id===id);
+  document.getElementById('confirm-msg').textContent=`Delete job #${j?.number} — ${j?.type}? This cannot be undone.`;
+  S.pendingDelete=id; S.pendingDeleteType='job';
+  openModal('modal-confirm');
+}
+function genInvoice(jobId){
+  const j=S.getJobById(jobId); if(!j) return;
+  populateInvModal();
+  document.getElementById('minv-job').value=jobId;
+  document.getElementById('minv-customer').value=j.customerId;
+  document.getElementById('minv-amount').value=j.amount||'';
+  document.getElementById('minv-desc').value=`${j.type} — Job #${j.number}`;
+  const due=new Date(); due.setDate(due.getDate()+14);
+  document.getElementById('minv-due').value=due.toISOString().split('T')[0];
+  openModal('modal-invoice');
+}
+
+function openCustModal(){
+  document.getElementById('mcust-id').value='';
+  document.getElementById('mcust-title').textContent='New Customer';
+  document.getElementById('mcust-first').value='';
+  document.getElementById('mcust-last').value='';
+  document.getElementById('mcust-phone').value='';
+  document.getElementById('mcust-email').value='';
+  document.getElementById('mcust-addr').value='';
+  document.getElementById('mcust-suburb').value='';
+  document.getElementById('mcust-post').value='';
+  document.getElementById('mcust-notes').value='';
+  document.getElementById('btn-del-cust').classList.add('hidden');
+  openModal('modal-customer');
+}
+function editCust(id){
+  const c=S.getCustomerById(id); if(!c) return;
+  document.getElementById('mcust-id').value=c.id;
+  document.getElementById('mcust-title').textContent=`Edit Customer`;
+  document.getElementById('mcust-first').value=c.first;
+  document.getElementById('mcust-last').value=c.last;
+  document.getElementById('mcust-phone').value=c.phone;
+  document.getElementById('mcust-email').value=c.email||'';
+  document.getElementById('mcust-addr').value=c.address||'';
+  document.getElementById('mcust-suburb').value=c.suburb||'';
+  document.getElementById('mcust-post').value=c.post||'';
+  document.getElementById('mcust-notes').value=c.notes||'';
+  document.getElementById('btn-del-cust').classList.remove('hidden');
+  openModal('modal-customer');
+}
+function saveCust(){
+  const id=document.getElementById('mcust-id').value;
+  const first=document.getElementById('mcust-first').value.trim();
+  const last=document.getElementById('mcust-last').value.trim();
+  if(!first||!last){ alert('Please enter first and last name'); return; }
+  const data={first,last,phone:document.getElementById('mcust-phone').value,email:document.getElementById('mcust-email').value,address:document.getElementById('mcust-addr').value,suburb:document.getElementById('mcust-suburb').value,post:document.getElementById('mcust-post').value,notes:document.getElementById('mcust-notes').value};
+  if(id){ Object.assign(S.customers.find(c=>c.id===id),data); }
+  else { S.customers.unshift({id:uid(),...data,createdAt:Date.now()}); }
+  S.save(); closeModal('modal-customer'); renderView();
+}
+function deleteCust(){
+  const id=document.getElementById('mcust-id').value;
+  const c=S.getCustomerById(id);
+  document.getElementById('confirm-msg').textContent=`Delete customer ${c?.first} ${c?.last}? This cannot be undone.`;
+  S.pendingDelete=id; S.pendingDeleteType='customer';
+  openModal('modal-confirm');
+}
+function newJobForCust(custId){ openJobModal(custId); }
+function selectCust(id){ S.activeCustId=id; renderView(); }
+function filterCusts(q){
+  document.querySelectorAll('.cust-list-item').forEach(el=>{
+    el.style.display=el.textContent.toLowerCase().includes(q.toLowerCase())?'':'none';
+  });
+}
+function initCustomerList(){
+  if(!S.activeCustId&&S.customers.length>0){ S.activeCustId=S.customers[0].id; renderView(); }
+}
+
+function populateInvModal(){
+  const jobSel=document.getElementById('minv-job');
+  jobSel.innerHTML='<option value="">No job</option>'+S.jobs.map(j=>`<option value="${j.id}">#${j.number} — ${j.type}</option>`).join('');
+  const cSel=document.getElementById('minv-customer');
+  cSel.innerHTML='<option value="">Select…</option>'+S.customers.map(c=>`<option value="${c.id}">${c.first} ${c.last}</option>`).join('');
+}
+function openInvModal(){
+  populateInvModal();
+  document.getElementById('minv-id').value='';
+  document.getElementById('minv-title').textContent='New Invoice';
+  document.getElementById('minv-amount').value='';
+  document.getElementById('minv-desc').value='';
+  document.getElementById('minv-status').value='Draft';
+  const due=new Date(); due.setDate(due.getDate()+14);
+  document.getElementById('minv-due').value=due.toISOString().split('T')[0];
+  openModal('modal-invoice');
+}
+function saveInv(){
+  const amt=parseFloat(document.getElementById('minv-amount').value)||0;
+  if(!amt){ alert('Please enter an amount'); return; }
+  S.invoices.unshift({
+    id:uid(), number:S.nextInvNum(),
+    jobId:document.getElementById('minv-job').value,
+    customerId:document.getElementById('minv-customer').value,
+    amount:amt, status:document.getElementById('minv-status').value,
+    dueDate:document.getElementById('minv-due').value,
+    desc:document.getElementById('minv-desc').value,
+    createdAt:Date.now(),
+  });
+  S.save(); closeModal('modal-invoice'); renderView();
+}
+function markInv(id,status){
+  const inv=S.invoices.find(i=>i.id===id);
+  if(inv){ inv.status=status; S.addActivity('trevor',`Invoice ${inv.number} marked as ${status}`); S.save(); renderView(); }
+}
+function deleteInv(id){
+  S.invoices=S.invoices.filter(i=>i.id!==id); S.save(); renderView();
+}
+function confirmDelete(){
+  if(S.pendingDeleteType==='job') S.jobs=S.jobs.filter(j=>j.id!==S.pendingDelete);
+  if(S.pendingDeleteType==='customer') S.customers=S.customers.filter(c=>c.id!==S.pendingDelete);
+  S.save(); closeModal('modal-confirm'); closeModal('modal-job'); closeModal('modal-customer'); renderView();
+}
+function saveSettings(){ alert('✅ Settings saved!'); }
+
+// ============================================================
+// ROLLO CHAT
+// ============================================================
+function renderChat(){
+  const el=document.getElementById('chat-msgs'); if(!el) return;
+  el.innerHTML=S.chatMessages.slice(-30).map(m=>`
+    <div class="chat-msg ${m.role==='user'?'user':''}">
+      ${m.role==='rollo'?`<div class="av av-sm" style="background:linear-gradient(135deg,#7c3aed,#4f46e5);flex-shrink:0">R</div>`:''}
+      <div class="chat-bubble ${m.role==='rollo'?'rollo':'user'}">${m.text}</div>
+    </div>`).join('');
+  el.scrollTop=el.scrollHeight;
+}
+function sendChat(){
+  const inp=document.getElementById('chat-input'); if(!inp||!inp.value.trim()) return;
+  const text=inp.value.trim(); inp.value='';
+  S.chatMessages.push({role:'user',text});
+  renderChat();
+  document.getElementById('chat-typing').classList.remove('hidden');
+  setTimeout(()=>{
+    document.getElementById('chat-typing')?.classList.add('hidden');
+    const reply=ROLLO_REPLIES[Math.floor(Math.random()*ROLLO_REPLIES.length)];
+    S.chatMessages.push({role:'rollo',text:reply});
+    S.save(); renderChat();
+  },1200+Math.random()*600);
+}
+
+// ============================================================
+// SIDEBAR BADGES
+// ============================================================
+function updateSidebarBadges(){
+  const sj=document.getElementById('sn-jobs');
+  if(sj) sj.textContent=S.liveJobs();
+  const si=document.getElementById('sn-inv');
+  if(si) si.textContent=S.overdueInv()||'';
+  if(!S.overdueInv()) si&&si.classList.add('hidden');
+}
+
+// ============================================================
+// SWITCH VIEW
+// ============================================================
+function switchView(v, statusFilter=''){
+  S.view=v; S.filterStatus=statusFilter;
+  document.querySelectorAll('.nav-link[data-view]').forEach(n=>n.classList.remove('active'));
+  document.querySelectorAll(`.nav-link[data-view="${v}"]`).forEach(n=>n.classList.add('active'));
+  renderView();
+}
+
+// ============================================================
+// INIT
+// ============================================================
+document.addEventListener('DOMContentLoaded',()=>{
+  S.load(); renderView(); renderChat();
+
+  // Nav links
+  document.querySelectorAll('.nav-link[data-view]').forEach(n=>{
+    n.addEventListener('click',()=>{
+      const status=n.dataset.status||'';
+      switchView(n.dataset.view, status);
+    });
+  });
+
+  // Modal close
+  document.querySelectorAll('[data-close]').forEach(btn=>{
+    btn.addEventListener('click',()=>closeModal(btn.dataset.close));
+  });
+  document.querySelectorAll('.overlay').forEach(ov=>{
+    ov.addEventListener('click',e=>{ if(e.target===ov) closeModal(ov.id); });
+  });
+  document.addEventListener('keydown',e=>{ if(e.key==='Escape') document.querySelectorAll('.overlay:not(.hidden)').forEach(m=>closeModal(m.id)); });
+
+  // Job modal
+  document.getElementById('btn-new-job').addEventListener('click',()=>openJobModal());
+  document.getElementById('btn-save-job').addEventListener('click',saveJob);
+  document.getElementById('btn-del-job').addEventListener('click',deleteJob);
+  document.getElementById('btn-new-customer').addEventListener('click',openCustModal);
+  document.getElementById('btn-save-cust').addEventListener('click',saveCust);
+  document.getElementById('btn-del-cust').addEventListener('click',deleteCust);
+  document.getElementById('btn-save-inv').addEventListener('click',saveInv);
+  document.getElementById('btn-confirm-yes').addEventListener('click',confirmDelete);
+
+  // Chat
+  document.getElementById('chat-toggle-btn').addEventListener('click',()=>{
+    document.getElementById('chat-panel').classList.toggle('hidden');
+    renderChat();
+  });
+  document.getElementById('chat-close').addEventListener('click',()=>document.getElementById('chat-panel').classList.add('hidden'));
+  document.getElementById('chat-send').addEventListener('click',sendChat);
+  document.getElementById('chat-input').addEventListener('keydown',e=>{ if(e.key==='Enter') sendChat(); });
+
+  // Global search
+  document.getElementById('global-search').addEventListener('input',e=>{
+    S.searchQ=e.target.value;
+    if(S.view==='jobs'||S.view==='customers') renderView();
+  });
+
+  // Auto-invoice link in job modal
+  document.getElementById('minv-job').addEventListener('change',function(){
+    const j=S.getJobById(this.value);
+    if(j){
+      document.getElementById('minv-customer').value=j.customerId;
+      document.getElementById('minv-amount').value=j.amount||'';
+    }
+  });
+
+  window.addEventListener('resize',()=>{ if(S.view==='dashboard') drawDashCharts(); if(S.view==='reports') drawReportCharts(); });
+});
+</script>
+</body>
+</html>

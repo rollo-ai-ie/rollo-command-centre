@@ -1,0 +1,16 @@
+{
+  "smsLog": [
+    {
+      "id": "sms_1772487265684",
+      "to": "+353832023590",
+      "body": "⚔️ Test message from Rollo Heating & Plumbing. Your SMS system is working! Job management by Rollo.",
+      "jobId": null,
+      "template": null,
+      "sentAt": "2026-03-02T21:34:25.684Z",
+      "status": "demo",
+      "sid": null
+    }
+  ],
+  "claims": [],
+  "smsQueue": []
+}

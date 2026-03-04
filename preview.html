@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>Rollo Engineer App — Desktop Preview</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{
+  font-family:-apple-system,'Helvetica Neue',sans-serif;
+  background:linear-gradient(135deg,#0f172a 0%,#1e1b4b 50%,#0f172a 100%);
+  min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;
+  color:#fff;overflow-x:hidden
+}
+
+/* ── header ── */
+.header{text-align:center;margin-bottom:40px}
+.header-badge{display:inline-flex;align-items:center;gap:8px;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.12);padding:6px 16px;border-radius:20px;font-size:13px;font-weight:500;color:rgba(255,255,255,.7);margin-bottom:16px}
+.header h1{font-size:38px;font-weight:800;letter-spacing:-.8px;background:linear-gradient(135deg,#fff 0%,#a5b4fc 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.header p{font-size:16px;color:rgba(255,255,255,.55);margin-top:8px;max-width:480px;line-height:1.5}
+
+/* ── main layout ── */
+.stage{display:flex;align-items:flex-start;gap:48px;flex-wrap:wrap;justify-content:center;padding:0 24px}
+
+/* ── phone frame ── */
+.phone-wrap{position:relative;flex-shrink:0}
+.phone-frame{
+  width:393px;height:852px;
+  background:#1a1a1a;border-radius:54px;
+  padding:14px;
+  box-shadow:
+    0 0 0 1px rgba(255,255,255,.12),
+    0 40px 120px rgba(0,0,0,.7),
+    inset 0 0 0 1px rgba(255,255,255,.06);
+  position:relative
+}
+.phone-inner{width:100%;height:100%;border-radius:42px;overflow:hidden;position:relative;background:#000}
+.phone-notch{position:absolute;top:14px;left:50%;transform:translateX(-50%);width:120px;height:34px;background:#1a1a1a;border-radius:0 0 22px 22px;z-index:10}
+.phone-notch-pill{width:80px;height:26px;background:#000;border-radius:13px;position:absolute;top:4px;left:50%;transform:translateX(-50%)}
+.phone-btn{position:absolute;background:#2a2a2a;border-radius:3px}
+.btn-side{width:4px;height:60px;right:-18px;top:140px}
+.btn-vol1{width:4px;height:34px;left:-18px;top:120px}
+.btn-vol2{width:4px;height:60px;left:-18px;top:165px}
+.btn-mute{width:4px;height:22px;left:-18px;top:96px}
+.phone-iframe{width:100%;height:100%;border:none;border-radius:42px}
+/* glow */
+.phone-glow{
+  position:absolute;inset:-40px;border-radius:94px;
+  background:radial-gradient(ellipse at center,rgba(99,102,241,.25) 0%,transparent 70%);
+  z-index:-1;pointer-events:none
+}
+
+/* ── feature panel ── */
+.panel{flex:1;min-width:280px;max-width:380px;display:flex;flex-direction:column;gap:16px}
+.panel-title{font-size:22px;font-weight:700;letter-spacing:-.3px;margin-bottom:4px}
+.panel-sub{font-size:14px;color:rgba(255,255,255,.5);margin-bottom:8px;line-height:1.6}
+
+.feature-card{background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.08);border-radius:16px;padding:16px 18px;cursor:pointer;transition:all .2s}
+.feature-card:hover{background:rgba(255,255,255,.09);border-color:rgba(99,102,241,.4);transform:translateX(4px)}
+.feature-card.active{background:rgba(99,102,241,.15);border-color:rgba(99,102,241,.5)}
+.fc-top{display:flex;align-items:center;gap:12px;margin-bottom:6px}
+.fc-ico{width:38px;height:38px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0}
+.fc-title{font-size:15px;font-weight:700;letter-spacing:-.2px}
+.fc-desc{font-size:13px;color:rgba(255,255,255,.55);line-height:1.5}
+
+/* ── bottom bar ── */
+.bottom-bar{margin-top:40px;display:flex;align-items:center;gap:20px;flex-wrap:wrap;justify-content:center;padding:0 24px 40px}
+.bb-chip{display:flex;align-items:center;gap:6px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);padding:8px 16px;border-radius:20px;font-size:13px;font-weight:500;color:rgba(255,255,255,.65)}
+.open-btn{background:#4f46e5;color:#fff;border:none;padding:12px 28px;border-radius:12px;font-size:15px;font-weight:700;cursor:pointer;transition:all .2s;letter-spacing:-.2px}
+.open-btn:hover{background:#4338ca;transform:translateY(-1px);box-shadow:0 8px 24px rgba(79,70,229,.4)}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="header-badge">⚔️ Rollo Field Services &nbsp;·&nbsp; PWA Demo</div>
+  <h1>Engineer Mobile App</h1>
+  <p>A fully functional ServiceM8-style job management app for field engineers — works on any phone, offline.</p>
+</div>
+
+<div class="stage">
+
+  <!-- Phone mockup with live iframe -->
+  <div class="phone-wrap">
+    <div class="phone-glow"></div>
+    <div class="phone-frame">
+      <div class="phone-notch"><div class="phone-notch-pill"></div></div>
+      <div class="phone-btn btn-mute"></div>
+      <div class="phone-btn btn-vol1"></div>
+      <div class="phone-btn btn-vol2"></div>
+      <div class="phone-btn btn-side"></div>
+      <div class="phone-inner">
+        <iframe class="phone-iframe" id="app-frame" src="http://localhost:8742/engineer.html" allowfullscreen></iframe>
+      </div>
+    </div>
+  </div>
+
+  <!-- Feature guide panel -->
+  <div class="panel">
+    <div class="panel-title">How it works</div>
+    <div class="panel-sub">Tap any feature card to navigate the app — or click directly inside the phone screen.</div>
+
+    <div class="feature-card active" onclick="nav('jobs','today')">
+      <div class="fc-top">
+        <div class="fc-ico" style="background:#1e1b4b">🗂</div>
+        <div class="fc-title">Jobs List</div>
+      </div>
+      <div class="fc-desc">Today's jobs with coloured status bars, customer name, address, time. Tap any job to open the full job card.</div>
+    </div>
+
+    <div class="feature-card" onclick="nav('jobs','all')">
+      <div class="fc-top">
+        <div class="fc-ico" style="background:#1a2e1a">🔍</div>
+        <div class="fc-title">Search & Filter</div>
+      </div>
+      <div class="fc-desc">Search by customer, address or job type. Filter by Today / Upcoming / Queue / All — instant results.</div>
+    </div>
+
+    <div class="feature-card" onclick="nav('inbox',null)">
+      <div class="fc-top">
+        <div class="fc-ico" style="background:#2e1a1a">💬</div>
+        <div class="fc-title">Team Inbox</div>
+      </div>
+      <div class="fc-desc">Messages from the whole team. Rollo AI sends job reminders, schedule changes, and invoice alerts.</div>
+    </div>
+
+    <div class="feature-card" onclick="nav('chat',null)">
+      <div class="fc-top">
+        <div class="fc-ico" style="background:#1e1038">⚔️</div>
+        <div class="fc-title">Rollo AI Chat</div>
+      </div>
+      <div class="fc-desc">Ask Rollo anything — reschedule a job, generate an invoice, get a customer's details. Instant replies.</div>
+    </div>
+
+    <div class="feature-card" onclick="nav('more',null)">
+      <div class="fc-top">
+        <div class="fc-ico" style="background:#1a2233">📊</div>
+        <div class="fc-title">My Profile & Stats</div>
+      </div>
+      <div class="fc-desc">Your jobs today, total jobs completed, links to the desktop dashboard and Ops Hub.</div>
+    </div>
+
+    <div style="margin-top:4px;padding:14px 18px;background:rgba(52,199,89,.08);border:1px solid rgba(52,199,89,.2);border-radius:12px">
+      <div style="font-size:13px;font-weight:700;color:#34C759;margin-bottom:4px">💡 Tip — Tap any job card</div>
+      <div style="font-size:12px;color:rgba(255,255,255,.5);line-height:1.5">Inside the job detail view you'll find Check In/Out, status picker, Notes diary, Photos, Materials, and one-tap invoicing.</div>
+    </div>
+  </div>
+</div>
+
+<div class="bottom-bar">
+  <div class="bb-chip">📱 iPhone-ready</div>
+  <div class="bb-chip">✅ Offline PWA</div>
+  <div class="bb-chip">🔗 Shared localStorage</div>
+  <div class="bb-chip">⚡ No App Store needed</div>
+  <button class="open-btn" onclick="window.open('http://localhost:8742/engineer.html','_blank')">Open Full Screen ↗</button>
+</div>
+
+<script>
+function nav(tab, seg){
+  const frame = document.getElementById('app-frame');
+  try {
+    const w = frame.contentWindow;
+    if(w && w.switchTab) {
+      w.switchTab(tab);
+      if(seg && w.S) { w.S.seg=seg; w.renderJobsScreen && w.renderJobsScreen(); }
+    }
+  } catch(e) {
+    // cross-origin fallback — reload with hash
+    frame.src = 'http://localhost:8742/engineer.html#'+tab;
+  }
+  document.querySelectorAll('.feature-card').forEach(c=>c.classList.remove('active'));
+  event.currentTarget.classList.add('active');
+}
+</script>
+</body>
+</html>
