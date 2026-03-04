@@ -1,0 +1,985 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover"/>
+<meta name="apple-mobile-web-app-capable" content="yes"/>
+<meta name="apple-mobile-web-app-status-bar-style" content="default"/>
+<meta name="apple-mobile-web-app-title" content="Rollo"/>
+<meta name="theme-color" content="#ffffff"/>
+<link rel="manifest" href="/manifest.json"/>
+<title>Rollo — Field Service</title>
+<style>
+/* ── Reset & Base ── */
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+:root{
+  --blue:#007AFF;--blue-dark:#0051D5;--blue-light:#E8F1FF;
+  --green:#34C759;--green-dark:#248A3D;--green-light:#E8F8ED;
+  --orange:#FF9500;--orange-light:#FFF3E0;
+  --red:#FF3B30;--red-light:#FFEBEA;
+  --purple:#AF52DE;--purple-light:#F3E8FF;
+  --gray1:#F2F2F7;--gray2:#E5E5EA;--gray3:#C7C7CC;--gray4:#AEAEB2;--gray5:#8E8E93;
+  --text:#000;--text2:#3C3C43;--text3:#8E8E93;
+  --card:#fff;--bg:#F2F2F7;--divider:#C6C6C8;
+  --safe-top:env(safe-area-inset-top,44px);
+  --safe-bottom:env(safe-area-inset-bottom,0px);
+  --nav-h:49px;
+}
+html,body{height:100%;background:var(--bg);color:var(--text);font-family:-apple-system,'SF Pro Text','Helvetica Neue',sans-serif;font-size:17px;overflow:hidden;-webkit-font-smoothing:antialiased}
+
+/* ── App shell ── */
+.app{display:flex;flex-direction:column;height:100%;max-width:430px;margin:0 auto;background:var(--bg);position:relative}
+
+/* ── iOS Nav Bar ── */
+.nav-bar{background:rgba(249,249,249,.94);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border-bottom:1px solid var(--divider);padding-top:var(--safe-top);flex-shrink:0}
+.nav-bar-inner{height:44px;display:flex;align-items:center;padding:0 16px;position:relative}
+.nav-bar-title{position:absolute;left:50%;transform:translateX(-50%);font-size:17px;font-weight:600;white-space:nowrap}
+.nav-bar-left{display:flex;align-items:center;gap:4px;color:var(--blue);font-size:17px;cursor:pointer;z-index:1}
+.nav-bar-left .back-chevron{font-size:22px;margin-right:-2px}
+.nav-bar-right{margin-left:auto;color:var(--blue);font-size:15px;font-weight:500;cursor:pointer;z-index:1}
+
+/* ── Large Title Nav ── */
+.large-title-bar{background:rgba(249,249,249,.94);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);padding-top:var(--safe-top);flex-shrink:0}
+.lt-top{height:44px;display:flex;align-items:center;padding:0 16px;justify-content:space-between}
+.lt-top .right-btn{display:flex;align-items:center;gap:14px}
+.lt-top .icon-btn{color:var(--blue);font-size:22px;cursor:pointer;border:none;background:transparent}
+.lt-title{padding:0 16px 6px;font-size:34px;font-weight:700;letter-spacing:.37px}
+.lt-search{margin:0 16px 10px;background:var(--gray2);border-radius:10px;display:flex;align-items:center;gap:6px;padding:7px 10px}
+.lt-search-ico{color:var(--gray5);font-size:15px}
+.lt-search input{border:none;background:transparent;outline:none;font-size:15px;color:var(--text);width:100%;font-family:inherit}
+.lt-search input::placeholder{color:var(--gray5)}
+
+/* ── Segment Control ── */
+.segment-wrap{padding:8px 16px;background:rgba(249,249,249,.94);border-bottom:1px solid var(--divider)}
+.segment{display:flex;background:var(--gray2);border-radius:9px;padding:2px}
+.seg-btn{flex:1;padding:6px 4px;border-radius:7px;border:none;background:transparent;font-size:13px;font-weight:500;color:var(--text3);cursor:pointer;transition:all .2s}
+.seg-btn.active{background:var(--card);color:var(--text);font-weight:600;box-shadow:0 1px 3px rgba(0,0,0,.12),0 0 0 .5px rgba(0,0,0,.04)}
+
+/* ── Scrollable content ── */
+.screen{flex:1;overflow-y:auto;overflow-x:hidden;-webkit-overflow-scrolling:touch;padding-bottom:calc(var(--nav-h) + var(--safe-bottom))}
+.screen-full{flex:1;overflow-y:auto;overflow-x:hidden;-webkit-overflow-scrolling:touch;padding-bottom:calc(var(--nav-h) + var(--safe-bottom) + 20px)}
+
+/* ── iOS List ── */
+.list-section{margin-bottom:0}
+.list-header{padding:22px 16px 6px;font-size:13px;font-weight:500;color:var(--text3);text-transform:uppercase;letter-spacing:-.3px}
+.list-card{background:var(--card);border-radius:12px;margin:0 16px 8px;overflow:hidden;box-shadow:0 1px 0 rgba(0,0,0,.04)}
+
+/* ── Job Row ── */
+.job-row{display:flex;align-items:stretch;cursor:pointer;transition:background .1s;position:relative}
+.job-row:active{background:var(--gray1)}
+.job-row+.job-row{border-top:1px solid var(--divider)}
+.jr-status-bar{width:5px;flex-shrink:0}
+.jr-body{flex:1;padding:12px 12px 12px 10px;min-width:0}
+.jr-top-row{display:flex;align-items:center;gap:8px;margin-bottom:3px}
+.jr-num{font-size:13px;font-weight:600;color:var(--text3);font-variant-numeric:tabular-nums}
+.jr-type-badge{font-size:11px;font-weight:600;padding:2px 8px;border-radius:10px;white-space:nowrap}
+.jr-status-badge{font-size:11px;font-weight:600;padding:2px 8px;border-radius:10px;margin-left:auto;white-space:nowrap;flex-shrink:0}
+.jr-customer{font-size:16px;font-weight:600;color:var(--text);margin-bottom:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.jr-address{font-size:13px;color:var(--text3);margin-bottom:6px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.jr-meta{display:flex;align-items:center;gap:10px;font-size:12px;color:var(--text3)}
+.jr-meta-item{display:flex;align-items:center;gap:3px}
+.jr-chevron{display:flex;align-items:center;padding-right:12px;color:var(--gray3)}
+/* Status bar colors */
+.s-quote .jr-status-bar{background:var(--gray3)}
+.s-wo .jr-status-bar{background:var(--blue)}
+.s-ip .jr-status-bar{background:var(--orange)}
+.s-done .jr-status-bar{background:var(--green)}
+.s-inv .jr-status-bar{background:var(--purple)}
+/* Status badge colors */
+.sb-quote{background:var(--gray1);color:var(--text3)}
+.sb-wo{background:var(--blue-light);color:var(--blue-dark)}
+.sb-ip{background:var(--orange-light);color:#A35200}
+.sb-done{background:var(--green-light);color:var(--green-dark)}
+.sb-inv{background:var(--purple-light);color:#6B2F8A}
+/* Type badge colors */
+.tb-heat{background:#FFEBE8;color:#C62828}
+.tb-plumb{background:#E3F2FD;color:#1565C0}
+.tb-elec{background:#FFF9E6;color:#E65100}
+.tb-sec{background:#F3E8FF;color:#6B2F8A}
+.tb-other{background:var(--gray1);color:var(--text3)}
+
+/* ── Bottom Tab Bar ── */
+.tab-bar{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:430px;height:calc(var(--nav-h) + var(--safe-bottom));background:rgba(249,249,249,.94);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border-top:1px solid var(--divider);display:flex;align-items:flex-start;padding-top:5px;z-index:50}
+.tab-item{flex:1;display:flex;flex-direction:column;align-items:center;gap:2px;cursor:pointer;border:none;background:transparent;padding:0;padding-bottom:var(--safe-bottom)}
+.tab-item .ti-ico{font-size:24px;transition:transform .15s}
+.tab-item .ti-label{font-size:10px;font-weight:500;color:var(--text3)}
+.tab-item.active .ti-ico{transform:scale(1)}
+.tab-item.active .ti-label{color:var(--blue)}
+.tab-center{flex:1;display:flex;flex-direction:column;align-items:center;cursor:pointer;border:none;background:transparent;padding-top:0;margin-top:-16px}
+.tab-center-ico{width:50px;height:50px;background:var(--blue);border-radius:50%;display:flex;align-items:center;justify-content:center;color:#fff;font-size:26px;font-weight:300;box-shadow:0 4px 12px rgba(0,122,255,.35);transition:transform .15s}
+.tab-center-ico:active,.tab-center:active .tab-center-ico{transform:scale(.93)}
+.tab-center .ti-label{font-size:10px;font-weight:500;color:var(--text3);margin-top:3px}
+
+/* ── DETAIL VIEW (full-screen slide) ── */
+.detail-screen{position:fixed;inset:0;background:var(--bg);z-index:200;display:flex;flex-direction:column;transform:translateX(100%);transition:transform .32s cubic-bezier(.4,0,.2,1);max-width:430px;margin:0 auto;left:50%;translate:-50% 0}
+.detail-screen.open{transform:translateX(0)}
+
+/* ── Detail Tab Bar ── */
+.detail-tabs{display:flex;background:var(--card);border-bottom:1px solid var(--divider);flex-shrink:0}
+.dt{flex:1;padding:10px 4px 8px;font-size:13px;font-weight:500;color:var(--text3);cursor:pointer;text-align:center;border-bottom:2px solid transparent;transition:all .15s}
+.dt.active{color:var(--blue);border-bottom-color:var(--blue);font-weight:600}
+
+/* ── Action Strip ── */
+.action-strip{display:flex;gap:0;background:var(--card);border-radius:12px;margin:12px 16px;overflow:hidden}
+.as-btn{flex:1;display:flex;flex-direction:column;align-items:center;gap:5px;padding:13px 6px;cursor:pointer;border:none;background:transparent;border-right:1px solid var(--divider);transition:background .15s}
+.as-btn:last-child{border-right:none}
+.as-btn:active{background:var(--gray1)}
+.as-ico{font-size:22px}
+.as-label{font-size:11px;font-weight:600;color:var(--blue)}
+
+/* ── Check In button ── */
+.checkin-btn{margin:0 16px 12px;width:calc(100% - 32px);padding:15px;border-radius:12px;border:none;font-size:17px;font-weight:600;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:10px;transition:all .18s;letter-spacing:-.2px}
+.checkin-btn:active{filter:brightness(.9)}
+.ci-idle{background:var(--green);color:#fff;box-shadow:0 3px 12px rgba(52,199,89,.35)}
+.ci-out{background:var(--orange);color:#fff;box-shadow:0 3px 12px rgba(255,149,0,.3)}
+.ci-done{background:var(--gray1);color:var(--green-dark);border:1px solid var(--divider)}
+
+/* ── Grouped sections ── */
+.d-group{background:var(--card);border-radius:12px;margin:0 16px 12px;overflow:hidden}
+.d-group-title{font-size:13px;font-weight:500;color:var(--text3);text-transform:uppercase;letter-spacing:-.1px;padding:16px 16px 6px;font-size:13px}
+.d-row{display:flex;align-items:center;padding:12px 16px;border-bottom:1px solid var(--divider)}
+.d-row:last-child{border-bottom:none}
+.d-row-ico{font-size:20px;width:30px;flex-shrink:0;margin-right:10px}
+.d-row-body{flex:1;min-width:0}
+.d-row-label{font-size:12px;color:var(--text3)}
+.d-row-val{font-size:15px;color:var(--text);font-weight:500;margin-top:1px}
+.d-row-action{color:var(--blue);font-size:15px;font-weight:500;cursor:pointer;white-space:nowrap;border:none;background:transparent;padding:4px 12px;border-radius:8px;transition:background .15s}
+.d-row-action:active{background:var(--gray1)}
+
+/* ── Status picker ── */
+.status-picker{display:flex;gap:8px;padding:0 16px 12px;overflow-x:auto;scrollbar-width:none}
+.status-picker::-webkit-scrollbar{display:none}
+.sp-chip{flex-shrink:0;padding:7px 16px;border-radius:20px;font-size:14px;font-weight:600;cursor:pointer;border:1.5px solid var(--gray2);background:var(--card);color:var(--text3);transition:all .15s}
+.sp-chip.active{border-color:var(--blue);background:var(--blue-light);color:var(--blue)}
+.sp-chip:active{transform:scale(.95)}
+
+/* ── Diary ── */
+.diary-item{display:flex;gap:12px;padding:12px 16px;border-bottom:1px solid var(--divider)}
+.diary-item:last-child{border-bottom:none}
+.diary-dot-col{display:flex;flex-direction:column;align-items:center;width:10px;flex-shrink:0;padding-top:4px}
+.diary-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0}
+.diary-line{width:2px;flex:1;background:var(--divider);margin-top:4px}
+.diary-body{flex:1}
+.diary-title{font-size:14px;font-weight:600;color:var(--text)}
+.diary-sub{font-size:13px;color:var(--text3);margin-top:2px;line-height:1.4}
+.diary-time{font-size:12px;color:var(--text3);margin-top:3px}
+
+/* ── Photo grid ── */
+.photo-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:2px;margin:0 0 12px}
+.photo-cell{aspect-ratio:1;background:var(--gray1);display:flex;align-items:center;justify-content:center;font-size:28px;cursor:pointer;overflow:hidden}
+.photo-add{border:2px dashed var(--gray3);background:#fff;color:var(--text3);border-radius:0;font-size:32px;transition:background .15s}
+.photo-add:active{background:var(--gray1)}
+
+/* ── Materials ── */
+.material-row{display:flex;align-items:center;padding:13px 16px;border-bottom:1px solid var(--divider)}
+.material-row:last-child{border-bottom:none}
+.mr-ico{width:36px;height:36px;background:var(--blue-light);border-radius:9px;display:flex;align-items:center;justify-content:center;font-size:18px;margin-right:12px;flex-shrink:0}
+.mr-body{flex:1}
+.mr-name{font-size:15px;font-weight:500}
+.mr-qty{font-size:13px;color:var(--text3);margin-top:1px}
+.mr-price{font-size:15px;font-weight:600;color:var(--text)}
+
+/* ── Complete button ── */
+.primary-action-btn{margin:12px 16px;width:calc(100% - 32px);padding:16px;border-radius:12px;border:none;font-size:17px;font-weight:600;cursor:pointer;transition:all .18s;letter-spacing:-.2px}
+.primary-action-btn:active{filter:brightness(.9);transform:scale(.98)}
+.pab-complete{background:var(--blue);color:#fff;box-shadow:0 3px 12px rgba(0,122,255,.3)}
+.pab-invoice{background:var(--green);color:#fff;box-shadow:0 3px 12px rgba(52,199,89,.3)}
+
+/* ── Empty state ── */
+.empty{text-align:center;padding:60px 24px}
+.empty-ico{font-size:56px;margin-bottom:14px}
+.empty-title{font-size:20px;font-weight:700;letter-spacing:-.4px;margin-bottom:8px}
+.empty-sub{font-size:15px;color:var(--text3);line-height:1.5}
+
+/* ── Inbox ── */
+.inbox-row{display:flex;gap:12px;padding:13px 16px;border-bottom:1px solid var(--divider);cursor:pointer}
+.inbox-row:active{background:var(--gray1)}
+.inbox-av{width:40px;height:40px;border-radius:50%;display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;font-size:15px;flex-shrink:0}
+.inbox-body{flex:1;min-width:0}
+.inbox-name{font-size:15px;font-weight:600;display:flex;align-items:center;justify-content:space-between}
+.inbox-time{font-size:12px;color:var(--text3);font-weight:400}
+.inbox-msg{font-size:13px;color:var(--text3);margin-top:1px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.unread-dot{width:10px;height:10px;border-radius:50%;background:var(--blue);flex-shrink:0;margin-top:3px}
+
+/* ── Rollo AI chat ── */
+.chat-msg-row{display:flex;gap:9px;margin-bottom:10px}
+.chat-msg-row.user{flex-direction:row-reverse}
+.chat-av-sm{width:28px;height:28px;border-radius:50%;background:var(--blue);display:flex;align-items:center;justify-content:center;color:#fff;font-size:11px;font-weight:700;flex-shrink:0;align-self:flex-end}
+.chat-bub{max-width:75%;padding:10px 14px;border-radius:18px;font-size:15px;line-height:1.4}
+.chat-bub.rollo{background:var(--card);border:1px solid var(--divider);border-radius:4px 18px 18px 18px}
+.chat-bub.user{background:var(--blue);color:#fff;border-radius:18px 4px 18px 18px}
+.chat-bub.rollo .name{font-size:11px;font-weight:700;color:var(--text3);margin-bottom:4px}
+.chat-input-bar{position:fixed;bottom:calc(var(--nav-h) + var(--safe-bottom));left:50%;transform:translateX(-50%);width:100%;max-width:430px;background:rgba(249,249,249,.94);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border-top:1px solid var(--divider);padding:8px 12px;display:flex;gap:8px;align-items:flex-end}
+.chat-inp{flex:1;background:var(--card);border:1px solid var(--divider);border-radius:20px;padding:9px 15px;font-size:15px;outline:none;font-family:inherit;max-height:80px;resize:none}
+.chat-inp:focus{border-color:var(--blue)}
+.chat-snd{width:34px;height:34px;background:var(--blue);border:none;border-radius:50%;color:#fff;font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:transform .15s}
+.chat-snd:active{transform:scale(.9)}
+
+/* ── More / Profile ── */
+.more-av{width:66px;height:66px;border-radius:50%;margin:28px auto 12px;display:flex;align-items:center;justify-content:center;color:#fff;font-size:26px;font-weight:700}
+.more-name{text-align:center;font-size:20px;font-weight:700;letter-spacing:-.4px}
+.more-role{text-align:center;font-size:14px;color:var(--text3);margin-top:3px}
+.more-stats{display:flex;margin:16px;background:var(--card);border-radius:12px;overflow:hidden}
+.more-stat{flex:1;padding:14px 8px;text-align:center;border-right:1px solid var(--divider)}
+.more-stat:last-child{border-right:none}
+.ms-val{font-size:24px;font-weight:700;color:var(--blue)}
+.ms-lab{font-size:11px;color:var(--text3);margin-top:2px}
+.more-section{margin:0 16px 6px;background:var(--card);border-radius:12px;overflow:hidden}
+.more-row{display:flex;align-items:center;padding:13px 16px;border-bottom:1px solid var(--divider);cursor:pointer;transition:background .15s}
+.more-row:last-child{border-bottom:none}
+.more-row:active{background:var(--gray1)}
+.more-row-ico{width:32px;height:32px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:17px;margin-right:12px;flex-shrink:0}
+.more-row-label{flex:1;font-size:15px;font-weight:500}
+.more-row-sub{font-size:13px;color:var(--text3)}
+.more-row-chevron{color:var(--gray3);font-size:16px}
+
+/* ── New Job Sheet ── */
+.sheet-backdrop{position:fixed;inset:0;background:rgba(0,0,0,.4);z-index:300}
+.sheet-panel{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:430px;background:var(--card);border-radius:20px 20px 0 0;z-index:301;padding-bottom:calc(var(--safe-bottom) + 16px);max-height:92vh;overflow-y:auto;-webkit-overflow-scrolling:touch}
+.sheet-handle{width:36px;height:4px;background:var(--gray3);border-radius:2px;margin:10px auto 6px}
+.sheet-header{display:flex;align-items:center;justify-content:space-between;padding:6px 20px 14px;border-bottom:1px solid var(--divider)}
+.sheet-header h3{font-size:17px;font-weight:600}
+.sheet-cancel{color:var(--blue);font-size:17px;cursor:pointer;border:none;background:none}
+.sheet-save-btn{color:var(--blue);font-size:17px;font-weight:600;cursor:pointer;border:none;background:none}
+.nj-field{padding:0 20px 14px}
+.nj-field label{font-size:13px;font-weight:600;color:var(--text3);display:block;margin-bottom:5px;text-transform:uppercase;letter-spacing:-.1px}
+.nj-field input,.nj-field select,.nj-field textarea{width:100%;border:1px solid var(--gray2);border-radius:10px;padding:11px 13px;font-size:15px;outline:none;font-family:inherit;background:var(--gray1);color:var(--text);-webkit-appearance:none}
+.nj-field input:focus,.nj-field select:focus{border-color:var(--blue);background:#fff}
+.nj-field-row{display:grid;grid-template-columns:1fr 1fr;gap:12px;padding:0 20px 14px}
+.nj-field-row .nj-field{padding:0}
+
+/* ── Staff picker ── */
+.staff-picker{padding:10px 16px 6px;display:flex;gap:8px;overflow-x:auto;background:rgba(249,249,249,.94);border-bottom:1px solid var(--divider);scrollbar-width:none}
+.staff-picker::-webkit-scrollbar{display:none}
+.sp-av-btn{display:flex;flex-direction:column;align-items:center;gap:4px;cursor:pointer;flex-shrink:0}
+.sp-av{width:44px;height:44px;border-radius:50%;display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;font-size:15px;border:3px solid transparent;transition:all .15s}
+.sp-av-btn.active .sp-av{border-color:var(--blue);box-shadow:0 0 0 2px rgba(0,122,255,.2)}
+.sp-av-name{font-size:11px;color:var(--text3);font-weight:500}
+.sp-av-btn.active .sp-av-name{color:var(--blue);font-weight:700}
+
+/* ── Toast ── */
+.toast{position:fixed;top:calc(var(--safe-top) + 54px);left:50%;transform:translateX(-50%);background:rgba(0,0,0,.78);color:#fff;padding:10px 20px;border-radius:22px;font-size:14px;font-weight:500;z-index:999;opacity:0;transition:opacity .25s;pointer-events:none;white-space:nowrap;backdrop-filter:blur(4px)}
+.toast.show{opacity:1}
+
+/* ── Scrollbar hidden ── */
+::-webkit-scrollbar{width:0;height:0}
+</style>
+</head>
+<body>
+<div class="app" id="app">
+
+  <!-- DYNAMIC SCREENS rendered here -->
+  <div id="screen-jobs" class="flex-col" style="display:flex;flex-direction:column;height:100%"></div>
+  <div id="screen-inbox" class="flex-col" style="display:none;flex-direction:column;height:100%"></div>
+  <div id="screen-map" class="flex-col" style="display:none;flex-direction:column;height:100%"></div>
+  <div id="screen-more" class="flex-col" style="display:none;flex-direction:column;height:100%"></div>
+  <div id="screen-chat" class="flex-col" style="display:none;flex-direction:column;height:100%"></div>
+
+  <!-- JOB DETAIL (full-screen slide-in) -->
+  <div class="detail-screen" id="detail-screen"></div>
+
+  <!-- NEW JOB SHEET -->
+  <div id="new-job-sheet" style="display:none">
+    <div class="sheet-backdrop" onclick="closeSheet()"></div>
+    <div class="sheet-panel">
+      <div class="sheet-handle"></div>
+      <div class="sheet-header">
+        <button class="sheet-cancel" onclick="closeSheet()">Cancel</button>
+        <h3>New Job</h3>
+        <button class="sheet-save-btn" onclick="saveNewJob()">Add</button>
+      </div>
+      <div style="height:12px"></div>
+      <div class="nj-field"><label>Customer</label><select id="nj-customer"></select></div>
+      <div class="nj-field"><label>Job Type</label><select id="nj-type"></select></div>
+      <div class="nj-field-row">
+        <div class="nj-field"><label>Date</label><input type="date" id="nj-date"/></div>
+        <div class="nj-field"><label>Time</label><input type="time" id="nj-time" value="09:00"/></div>
+      </div>
+      <div class="nj-field"><label>Assign To</label><select id="nj-staff"></select></div>
+      <div class="nj-field"><label>Amount (€)</label><input type="number" id="nj-amount" placeholder="0.00" step="0.01"/></div>
+      <div class="nj-field"><label>Notes</label><textarea id="nj-notes" rows="3" placeholder="Job notes, access info…"></textarea></div>
+    </div>
+  </div>
+
+  <!-- TAB BAR -->
+  <nav class="tab-bar" id="tab-bar">
+    <button class="tab-item active" data-tab="jobs"><span class="ti-ico">🗂</span><span class="ti-label">Jobs</span></button>
+    <button class="tab-item" data-tab="inbox"><span class="ti-ico">💬</span><span class="ti-label">Inbox</span></button>
+    <button class="tab-center" id="tab-new"><div class="tab-center-ico">＋</div><span class="ti-label">New Job</span></button>
+    <button class="tab-item" data-tab="chat"><span class="ti-ico">⚔️</span><span class="ti-label">Rollo AI</span></button>
+    <button class="tab-item" data-tab="more"><span class="ti-ico">⋯</span><span class="ti-label">More</span></button>
+  </nav>
+</div>
+
+<!-- TOAST -->
+<div class="toast" id="toast"></div>
+
+<script>
+// ============================================================
+// DATA
+// ============================================================
+const STAFF = [
+  {id:'trevor',  name:'Trevor',   initials:'T',  color:'#4f46e5'},
+  {id:'paula',   name:'Paula',    initials:'P',  color:'#db2777'},
+  {id:'pamela',  name:'Pamela',   initials:'Pa', color:'#059669'},
+  {id:'darren',  name:'Darren',   initials:'D',  color:'#f59e0b'},
+  {id:'jonathan',name:'Jonathan', initials:'J',  color:'#3b82f6'},
+  {id:'lucas',   name:'Lucas',    initials:'L',  color:'#8b5cf6'},
+  {id:'thomas',  name:'Thomas',   initials:'Th', color:'#ef4444'},
+  {id:'william', name:'William',  initials:'W',  color:'#0891b2'},
+];
+const JOB_TYPES=['No Heat / No Hot Water','Boiler Service','Radiator Issue','Tap Issue','Shower Issue','General Plumbing','Electrical','Roofing','Security','Other'];
+const STATUS_MAP={
+  'Quote':       {cls:'s-quote',  badge:'sb-quote',  color:'#8E8E93',label:'Quote'},
+  'Work Order':  {cls:'s-wo',     badge:'sb-wo',     color:'#007AFF',label:'Work Order'},
+  'In Progress': {cls:'s-ip',     badge:'sb-ip',     color:'#FF9500',label:'In Progress'},
+  'Completed':   {cls:'s-done',   badge:'sb-done',   color:'#34C759',label:'Completed'},
+  'Invoiced':    {cls:'s-inv',    badge:'sb-inv',    color:'#AF52DE',label:'Invoiced'},
+};
+const TYPE_BADGE={
+  'No Heat / No Hot Water':'tb-heat','Boiler Service':'tb-heat','Radiator Issue':'tb-heat',
+  'Tap Issue':'tb-plumb','Shower Issue':'tb-plumb','General Plumbing':'tb-plumb',
+  'Electrical':'tb-elec','Roofing':'tb-other','Security':'tb-sec','Other':'tb-other',
+};
+const ROLLO=[
+  "On it ⚔️ Job updated.","Got it — I'll keep an eye on that.",
+  "Smart move. Logging it now.","Done! Customer will be notified.",
+  "I'll prep the invoice automatically.","Reminder set for 30 minutes before.",
+  "Great work! Time logged and saved.","No problem — I'll reschedule that for you.",
+];
+const today=new Date().toISOString().split('T')[0];
+
+// ============================================================
+// STATE
+// ============================================================
+const S={
+  tab:'jobs',
+  seg:'today',
+  activeStaff:'trevor',
+  detailJobId:null,
+  detailTab:'details',
+  checkedIn:{},
+  siteNotes:{},
+  chatMsgs:[{r:'rollo',t:"Hi! I'm Rollo ⚔️ — your AI assistant for the field. I can see all your jobs, customer details, and schedules. What do you need?"}],
+  searchQ:'',
+
+  load(){
+    const g=(k,d)=>{try{const v=localStorage.getItem(k);return v?JSON.parse(v):d}catch(e){return d}};
+    this.activeStaff=g('sm8_staff','trevor');
+    this.checkedIn  =g('sm8_ci',{});
+    this.siteNotes  =g('sm8_notes',{});
+    this.chatMsgs   =g('sm8_chat',this.chatMsgs);
+    this._seed();
+  },
+  _seed(){
+    // Seed demo data if no jobs exist
+    if(localStorage.getItem('ros_jobs')) return;
+    const td=today;
+    const tm=new Date();tm.setDate(tm.getDate()+1);const tmr=tm.toISOString().split('T')[0];
+    const customers=[
+      {id:'c1',first:'Colm',last:'Murphy',phone:'087 123 4567',address:'14 Beech Road',suburb:'Dundrum',city:'Dublin 14'},
+      {id:'c2',first:'Sinéad',last:'O\'Brien',phone:'086 234 5678',address:'8 Chestnut Ave',suburb:'Rathfarnham',city:'Dublin 16'},
+      {id:'c3',first:'Padraig',last:'Walsh',phone:'085 345 6789',address:'22 Maple Drive',suburb:'Tallaght',city:'Dublin 24'},
+      {id:'c4',first:'Mary',last:'Flanagan',phone:'083 456 7890',address:'5 Elm Park',suburb:'Clontarf',city:'Dublin 3'},
+      {id:'c5',first:'Brian',last:'Kelly',phone:'087 567 8901',address:'31 Oak Avenue',suburb:'Blanchardstown',city:'Dublin 15'},
+      {id:'c6',first:'Aoife',last:'Brennan',phone:'086 678 9012',address:'17 Willow Close',suburb:'Lucan',city:'Dublin',},
+      {id:'c7',first:'Seamus',last:'Doyle',phone:'085 789 0123',address:'9 Pine Grove',suburb:'Sandyford',city:'Dublin 18'},
+      {id:'c8',first:'Niamh',last:'Connors',phone:'083 890 1234',address:'44 Ash Lane',suburb:'Swords',city:'Co. Dublin'},
+    ];
+    const jobs=[
+      {id:'j1',number:19440,type:'No Heat / No Hot Water',status:'In Progress',customerId:'c1',staffId:'trevor',  scheduledDate:td,scheduledTime:'09:00',duration:60,amount:150,notes:'Customer reports no heat since yesterday morning. Check boiler and pump.',createdAt:Date.now()-86400000},
+      {id:'j2',number:19441,type:'Boiler Service',       status:'Work Order',  customerId:'c2',staffId:'trevor',  scheduledDate:td,scheduledTime:'11:00',duration:90,amount:120,notes:'Annual boiler service. Gas cert required.',createdAt:Date.now()-82800000},
+      {id:'j3',number:19442,type:'Radiator Issue',       status:'Work Order',  customerId:'c3',staffId:'paula',   scheduledDate:td,scheduledTime:'10:00',duration:60,amount:95, notes:'Two radiators not heating on ground floor.',createdAt:Date.now()-79200000},
+      {id:'j4',number:19443,type:'Tap Issue',            status:'Quote',       customerId:'c4',staffId:'pamela',  scheduledDate:td,scheduledTime:'14:00',duration:45,amount:75, notes:'Dripping kitchen tap. Replace washer.',createdAt:Date.now()-75600000},
+      {id:'j5',number:19444,type:'Shower Issue',         status:'Work Order',  customerId:'c5',staffId:'darren',  scheduledDate:td,scheduledTime:'13:00',duration:60,amount:110,notes:'Shower pressure very low. Check pump and pipework.',createdAt:Date.now()-72000000},
+      {id:'j6',number:19445,type:'Boiler Service',       status:'Completed',   customerId:'c6',staffId:'trevor',  scheduledDate:td,scheduledTime:'08:00',duration:90,amount:120,notes:'Annual service — gas cert issued.',createdAt:Date.now()-90000000},
+      {id:'j7',number:19446,type:'General Plumbing',     status:'Work Order',  customerId:'c7',staffId:'jonathan',scheduledDate:tmr,scheduledTime:'09:30',duration:120,amount:200,notes:'New bathroom pipework. Full day job.',createdAt:Date.now()-68400000},
+      {id:'j8',number:19447,type:'No Heat / No Hot Water',status:'Quote',      customerId:'c8',staffId:'lucas',   scheduledDate:tmr,scheduledTime:'11:00',duration:60,amount:150,notes:'No hot water. Possibly faulty immersion.',createdAt:Date.now()-64800000},
+      {id:'j9',number:19448,type:'Boiler Service',       status:'Work Order',  customerId:'c1',staffId:'william', scheduledDate:tmr,scheduledTime:'14:00',duration:90,amount:120,notes:'New customer — annual service.',createdAt:Date.now()-61200000},
+      {id:'j10',number:19449,type:'Electrical',          status:'Invoiced',    customerId:'c2',staffId:'thomas',  scheduledDate:'2026-02-28',scheduledTime:'10:00',duration:60,amount:180,notes:'Consumer unit upgrade.',createdAt:Date.now()-172800000},
+    ];
+    localStorage.setItem('ros_customers',JSON.stringify(customers));
+    localStorage.setItem('ros_jobs',JSON.stringify(jobs));
+  },
+  save(){
+    try{
+      localStorage.setItem('sm8_staff',this.activeStaff);
+      localStorage.setItem('sm8_ci',JSON.stringify(this.checkedIn));
+      localStorage.setItem('sm8_notes',JSON.stringify(this.siteNotes));
+      localStorage.setItem('sm8_chat',JSON.stringify(this.chatMsgs));
+    }catch(e){}
+  },
+  jobs(){try{return JSON.parse(localStorage.getItem('ros_jobs')||'[]')}catch(e){return[]}},
+  custs(){try{return JSON.parse(localStorage.getItem('ros_customers')||'[]')}catch(e){return[]}},
+  saveJob(j){const jobs=this.jobs();const i=jobs.findIndex(x=>x.id===j.id);if(i>=0)jobs[i]=j;else jobs.unshift(j);localStorage.setItem('ros_jobs',JSON.stringify(jobs));},
+  staff(id){return STAFF.find(s=>s.id===id)||STAFF[0];},
+  cust(id){return this.custs().find(c=>c.id===id)||null;},
+  custName(id){const c=this.cust(id);return c?`${c.first} ${c.last}`:'—';},
+  custPhone(id){return this.cust(id)?.phone||'';},
+  custAddr(id){const c=this.cust(id);return c?`${c.address||''}, ${c.suburb||''}`.replace(/^, /,''):'';}
+};
+
+// ============================================================
+// HELPERS
+// ============================================================
+function uid(){return 'e'+Math.random().toString(36).slice(2,9)}
+function nowTime(){return new Date().toLocaleTimeString('en-IE',{hour:'2-digit',minute:'2-digit'})}
+function fmtDate(d){if(!d)return'—';try{return new Date(d+'T00:00:00').toLocaleDateString('en-IE',{weekday:'short',day:'numeric',month:'short'})}catch(e){return d}}
+function euro(n){return'€'+(parseFloat(n)||0).toFixed(2)}
+function toast(msg,d=2400){const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),d)}
+
+// ============================================================
+// JOBS SCREEN
+// ============================================================
+function renderJobsScreen(){
+  const el=document.getElementById('screen-jobs');
+  const all=S.jobs();
+  const myJobs=all.filter(j=>j.staffId===S.activeStaff);
+  let filtered=myJobs;
+  if(S.seg==='today') filtered=myJobs.filter(j=>j.scheduledDate===today||j.status==='In Progress');
+  else if(S.seg==='upcoming') filtered=myJobs.filter(j=>j.scheduledDate>today);
+  else if(S.seg==='unscheduled') filtered=myJobs.filter(j=>!j.scheduledDate&&j.status!=='Completed'&&j.status!=='Invoiced');
+  if(S.searchQ) filtered=filtered.filter(j=>S.custName(j.customerId).toLowerCase().includes(S.searchQ)||j.type.toLowerCase().includes(S.searchQ)||String(j.number).includes(S.searchQ));
+  filtered=filtered.sort((a,b)=>(a.scheduledTime||'99:99').localeCompare(b.scheduledTime||'99:99'));
+
+  el.innerHTML=`
+    <!-- Large title nav -->
+    <div class="large-title-bar">
+      <div class="lt-top">
+        <span style="font-size:17px;font-weight:600">Rollo</span>
+        <div class="right-btn">
+          <button class="icon-btn" onclick="showStaffPicker()" title="Switch engineer">👤</button>
+          <button class="icon-btn" onclick="toast('Filter options coming soon')">⊞</button>
+        </div>
+      </div>
+      <div class="lt-title">Jobs</div>
+      <div class="lt-search"><span class="lt-search-ico">🔍</span><input id="job-search" type="search" placeholder="Search jobs" value="${S.searchQ}" oninput="S.searchQ=this.value;renderJobsScreen()"/></div>
+    </div>
+    <!-- Staff picker -->
+    <div class="staff-picker">
+      ${STAFF.map(s=>`
+        <div class="sp-av-btn ${s.id===S.activeStaff?'active':''}" onclick="switchStaff('${s.id}')">
+          <div class="sp-av" style="background:${s.color}">${s.initials}</div>
+          <span class="sp-av-name">${s.name}</span>
+        </div>`).join('')}
+    </div>
+    <!-- Segment -->
+    <div class="segment-wrap">
+      <div class="segment">
+        <button class="seg-btn ${S.seg==='today'?'active':''}" onclick="setSeg('today')">Today</button>
+        <button class="seg-btn ${S.seg==='upcoming'?'active':''}" onclick="setSeg('upcoming')">Upcoming</button>
+        <button class="seg-btn ${S.seg==='unscheduled'?'active':''}" onclick="setSeg('unscheduled')">Queue</button>
+        <button class="seg-btn ${S.seg==='all'?'active':''}" onclick="setSeg('all')">All</button>
+      </div>
+    </div>
+    <!-- Job list -->
+    <div class="screen">
+      ${filtered.length===0?`
+        <div class="empty">
+          <div class="empty-ico">${S.seg==='today'?'☀️':'🔧'}</div>
+          <div class="empty-title">${S.seg==='today'?'All clear today!':'No jobs found'}</div>
+          <div class="empty-sub">${S.seg==='today'?'No jobs scheduled for today.<br/>Tap + to create one.':'Try a different filter or search.'}</div>
+        </div>`:`
+        <div style="height:6px"></div>
+        <div class="list-card">${filtered.map((j,i)=>jobRowHTML(j,i<filtered.length-1)).join('')}</div>
+        <div style="height:6px"></div>`}
+    </div>`;
+}
+
+function jobRowHTML(j,hasDivider){
+  const sm=STATUS_MAP[j.status]||STATUS_MAP['Quote'];
+  const tb=TYPE_BADGE[j.type]||'tb-other';
+  const ci=S.checkedIn[j.id];
+  const checkedInNow=ci&&ci.ci&&!ci.co;
+  const shortType=j.type.length>14?j.type.split('/')[0].trim():j.type;
+  return `<div class="job-row ${sm.cls}" onclick="openDetail('${j.id}')">
+    <div class="jr-status-bar"></div>
+    <div class="jr-body">
+      <div class="jr-top-row">
+        <span class="jr-num">#${j.number}</span>
+        <span class="jr-type-badge ${tb}">${shortType}</span>
+        <span class="jr-status-badge ${sm.badge}">${j.status}</span>
+      </div>
+      <div class="jr-customer">${S.custName(j.customerId)}</div>
+      <div class="jr-address">📍 ${S.custAddr(j.customerId)||'No address'}</div>
+      <div class="jr-meta">
+        <span class="jr-meta-item">👤 ${S.staff(j.staffId).name}</span>
+        ${j.scheduledDate?`<span class="jr-meta-item">📅 ${fmtDate(j.scheduledDate)}</span>`:''}
+        ${j.scheduledTime?`<span class="jr-meta-item">🕐 ${j.scheduledTime}</span>`:''}
+        ${checkedInNow?`<span class="jr-meta-item" style="color:#34C759;font-weight:700">● On site</span>`:''}
+      </div>
+    </div>
+    <div class="jr-chevron">›</div>
+  </div>`;
+}
+
+function setSeg(s){S.seg=s;renderJobsScreen()}
+function switchStaff(id){S.activeStaff=id;S.save();renderJobsScreen();toast(`Viewing ${S.staff(id).name}'s jobs`)}
+
+// ============================================================
+// JOB DETAIL
+// ============================================================
+function openDetail(id){
+  S.detailJobId=id;
+  S.detailTab='details';
+  renderDetail();
+  document.getElementById('detail-screen').classList.add('open');
+}
+function closeDetail(){
+  document.getElementById('detail-screen').classList.remove('open');
+  S.detailJobId=null;
+  renderJobsScreen();
+}
+
+function renderDetail(){
+  const id=S.detailJobId;
+  const jobs=S.jobs();
+  const j=jobs.find(x=>x.id===id);
+  if(!j){closeDetail();return;}
+  const sm=STATUS_MAP[j.status]||STATUS_MAP['Quote'];
+  const ci=S.checkedIn[id]||{};
+  const isIn=ci.ci&&!ci.co;
+  const isDone=ci.ci&&ci.co;
+  const notes=S.siteNotes[id]||[];
+  const phone=S.custPhone(j.customerId);
+  const addr=S.custAddr(j.customerId);
+
+  let tabContent='';
+  if(S.detailTab==='details'){
+    tabContent=`
+      <!-- Quick actions -->
+      <div class="action-strip">
+        <button class="as-btn" onclick="navigate('${addr}')"><span class="as-ico">🗺️</span><span class="as-label">Navigate</span></button>
+        <button class="as-btn" onclick="callCust('${phone}')"><span class="as-ico">📞</span><span class="as-label">Call</span></button>
+        <button class="as-btn" onclick="sendOnMyWay('${id}')"><span class="as-ico">🚗</span><span class="as-label">On My Way</span></button>
+        <button class="as-btn" onclick="sendRunningLate('${id}')"><span class="as-ico">⚠️</span><span class="as-label">Running Late</span></button>
+      </div>
+      <!-- Check in/out -->
+      ${!isIn&&!isDone?`<button class="checkin-btn ci-idle" onclick="checkIn('${id}')">✅&nbsp;&nbsp;Check In to Job</button>`:
+        isIn?`<button class="checkin-btn ci-out" onclick="checkOut('${id}')">⏱&nbsp;&nbsp;Checked in ${ci.ci} — Tap to Check Out</button>`:
+        `<div class="checkin-btn ci-done">✅&nbsp;&nbsp;On site: ${ci.ci} – ${ci.co}</div>`}
+      <!-- Status -->
+      <div style="padding:0 16px 4px;font-size:13px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:-.1px;margin-top:4px">Status</div>
+      <div class="status-picker">
+        ${Object.keys(STATUS_MAP).map(s=>`<div class="sp-chip${j.status===s?' active':''}" onclick="updateStatus('${id}','${s}')">${s}</div>`).join('')}
+      </div>
+      <!-- Customer -->
+      <div class="d-group">
+        <div class="d-group-title">Customer</div>
+        <div class="d-row"><div class="d-row-ico">👤</div><div class="d-row-body"><div class="d-row-label">Name</div><div class="d-row-val">${S.custName(j.customerId)}</div></div></div>
+        ${phone?`<div class="d-row"><div class="d-row-ico">📞</div><div class="d-row-body"><div class="d-row-label">Phone</div><div class="d-row-val">${phone}</div></div><button class="d-row-action" onclick="callCust('${phone}')">Call</button></div>`:''}
+        ${addr?`<div class="d-row"><div class="d-row-ico">📍</div><div class="d-row-body"><div class="d-row-label">Address</div><div class="d-row-val">${addr}</div></div><button class="d-row-action" onclick="navigate('${addr}')">Go</button></div>`:''}
+      </div>
+      <!-- Job info -->
+      <div class="d-group">
+        <div class="d-group-title">Job Details</div>
+        <div class="d-row"><div class="d-row-ico">🔧</div><div class="d-row-body"><div class="d-row-label">Type</div><div class="d-row-val">${j.type}</div></div></div>
+        <div class="d-row"><div class="d-row-ico">📅</div><div class="d-row-body"><div class="d-row-label">Scheduled</div><div class="d-row-val">${fmtDate(j.scheduledDate)} ${j.scheduledTime?'at '+j.scheduledTime:''}</div></div></div>
+        <div class="d-row"><div class="d-row-ico">⏱</div><div class="d-row-body"><div class="d-row-label">Duration</div><div class="d-row-val">${j.duration||60} minutes</div></div></div>
+        ${j.amount?`<div class="d-row"><div class="d-row-ico">💰</div><div class="d-row-body"><div class="d-row-label">Amount</div><div class="d-row-val">${euro(j.amount)}</div></div></div>`:''}
+        <div class="d-row"><div class="d-row-ico">👤</div><div class="d-row-body"><div class="d-row-label">Assigned To</div><div class="d-row-val">${S.staff(j.staffId).name}</div></div></div>
+        ${j.notes?`<div class="d-row"><div class="d-row-ico">📋</div><div class="d-row-body"><div class="d-row-label">Notes</div><div class="d-row-val" style="font-size:14px;line-height:1.5">${j.notes}</div></div></div>`:''}
+      </div>
+      <!-- Primary action -->
+      ${j.status!=='Completed'&&j.status!=='Invoiced'?`<button class="primary-action-btn pab-complete" onclick="completeJob('${id}')">Mark Job as Complete</button>`:j.status==='Completed'?`<button class="primary-action-btn pab-invoice" onclick="toast('Invoice generated and ready to send ✅')">Generate Invoice</button>`:''}
+      <div style="height:20px"></div>`;
+  } else if(S.detailTab==='diary'){
+    const allNotes=[
+      {title:'Job Created',sub:`Job #${j.number} assigned to ${S.staff(j.staffId).name}`,time:'System',dot:'#8E8E93'},
+      ...notes.map(n=>({title:`Note by ${S.staff(n.who||'trevor').name}`,sub:n.text,time:n.t,dot:S.staff(n.who||'trevor').color})),
+      ...(ci.ci?[{title:'Checked In',sub:`On site at ${ci.ci}`,time:ci.ci,dot:'#34C759'}]:[]),
+      ...(ci.co?[{title:'Checked Out',sub:`Left site at ${ci.co}`,time:ci.co,dot:'#FF9500'}]:[]),
+      ...(j.status==='Completed'?[{title:'Job Completed',sub:'Marked as completed',time:ci.co||nowTime(),dot:'#34C759'}]:[]),
+    ];
+    tabContent=`
+      <div style="height:12px"></div>
+      <div class="d-group">
+        ${allNotes.map((n,i)=>`
+          <div class="diary-item">
+            <div class="diary-dot-col"><div class="diary-dot" style="background:${n.dot}"></div>${i<allNotes.length-1?'<div class="diary-line"></div>':''}</div>
+            <div class="diary-body"><div class="diary-title">${n.title}</div>${n.sub?`<div class="diary-sub">${n.sub}</div>`:''}<div class="diary-time">${n.time}</div></div>
+          </div>`).join('')}
+      </div>
+      <button class="primary-action-btn" style="background:var(--gray1);color:var(--blue);border:1.5px solid var(--gray2)" onclick="addNote('${id}')">+ Add Note</button>
+      <div style="height:20px"></div>`;
+  } else if(S.detailTab==='photos'){
+    tabContent=`
+      <div style="height:12px"></div>
+      <div class="photo-grid" style="margin:0 16px 12px;border-radius:12px;overflow:hidden">
+        <div class="photo-cell photo-add" onclick="toast('Open camera to add a photo')">＋</div>
+      </div>
+      <div style="padding:0 16px;font-size:13px;color:var(--text3);text-align:center">Tap + to take a photo or choose from your camera roll</div>
+      <div style="height:20px"></div>`;
+  } else if(S.detailTab==='materials'){
+    tabContent=`
+      <div style="height:12px"></div>
+      <div class="d-group">
+        <div class="d-group-title">Materials & Parts</div>
+        <div class="material-row"><div class="mr-ico">🔩</div><div class="mr-body"><div class="mr-name">Call-out Fee</div><div class="mr-qty">1 × €65.00</div></div><div class="mr-price">€65.00</div></div>
+        <div class="material-row"><div class="mr-ico">🔧</div><div class="mr-body"><div class="mr-name">Labour (1hr)</div><div class="mr-qty">1 × €85.00</div></div><div class="mr-price">€85.00</div></div>
+      </div>
+      <button class="primary-action-btn" style="background:var(--gray1);color:var(--blue);border:1.5px solid var(--gray2)" onclick="toast('Add material or part')">+ Add Item</button>
+      <div style="padding:0 16px;margin-top:12px">
+        <div style="display:flex;justify-content:space-between;padding:12px 0;border-top:1px solid var(--divider);font-size:17px;font-weight:700">
+          <span>Total</span><span>${euro(j.amount||150)}</span>
+        </div>
+      </div>
+      <div style="height:20px"></div>`;
+  }
+
+  document.getElementById('detail-screen').innerHTML=`
+    <div class="large-title-bar" style="padding-top:0">
+      <div class="nav-bar-inner" style="padding-top:var(--safe-top)">
+        <button class="nav-bar-left" onclick="closeDetail()"><span class="back-chevron">‹</span> Jobs</button>
+        <span class="nav-bar-title">#${j.number}</span>
+        <span class="nav-bar-right" onclick="toast('More options')">⋯</span>
+      </div>
+    </div>
+    <!-- Job header card -->
+    <div style="background:var(--card);padding:14px 16px 14px;border-bottom:1px solid var(--divider)">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px">
+        <div style="font-size:22px;font-weight:700;letter-spacing:-.4px">${j.type}</div>
+        <span class="jr-status-badge ${sm.badge}" style="font-size:13px;padding:5px 12px">${j.status}</span>
+      </div>
+      <div style="font-size:16px;font-weight:600;color:var(--text2)">${S.custName(j.customerId)}</div>
+      <div style="font-size:14px;color:var(--text3);margin-top:2px">📍 ${S.custAddr(j.customerId)||'No address'}</div>
+      ${j.scheduledDate?`<div style="font-size:13px;color:var(--text3);margin-top:4px">📅 ${fmtDate(j.scheduledDate)} ${j.scheduledTime?'· '+j.scheduledTime:''}</div>`:''}
+    </div>
+    <!-- Detail tabs -->
+    <div class="detail-tabs">
+      <div class="dt ${S.detailTab==='details'?'active':''}" onclick="setDetailTab('details','${id}')">Details</div>
+      <div class="dt ${S.detailTab==='diary'?'active':''}" onclick="setDetailTab('diary','${id}')">Diary</div>
+      <div class="dt ${S.detailTab==='photos'?'active':''}" onclick="setDetailTab('photos','${id}')">Photos</div>
+      <div class="dt ${S.detailTab==='materials'?'active':''}" onclick="setDetailTab('materials','${id}')">Materials</div>
+    </div>
+    <div class="screen-full">${tabContent}</div>`;
+}
+
+function setDetailTab(tab,id){S.detailTab=tab;S.detailJobId=id;renderDetail()}
+function checkIn(id){
+  S.checkedIn[id]={ci:nowTime()};
+  const jobs=S.jobs();const j=jobs.find(x=>x.id===id);
+  if(j){j.status='In Progress';S.saveJob(j);}
+  S.save();renderDetail();toast('✅ Checked in — timer started');
+}
+function checkOut(id){
+  if(S.checkedIn[id])S.checkedIn[id].co=nowTime();
+  S.save();renderDetail();toast('⏱ Checked out — time logged');
+}
+function updateStatus(id,status){
+  const jobs=S.jobs();const j=jobs.find(x=>x.id===id);
+  if(j){j.status=status;S.saveJob(j);}
+  renderDetail();toast(`Status → ${status}`);
+}
+function completeJob(id){
+  updateStatus(id,'Completed');
+  if(S.checkedIn[id]&&!S.checkedIn[id].co){S.checkedIn[id].co=nowTime();S.save();}
+  toast('🎉 Job complete!');
+  sendJobComplete(id);
+}
+function addNote(id){
+  const t=prompt('Add a site note:');
+  if(t&&t.trim()){
+    if(!S.siteNotes[id])S.siteNotes[id]=[];
+    S.siteNotes[id].push({text:t.trim(),who:S.activeStaff,t:nowTime()});
+    S.save();renderDetail();toast('📝 Note added to diary');
+  }
+}
+function callCust(ph){if(ph)window.location.href=`tel:${ph.replace(/\s/g,'')}`;else toast('No phone number')}
+function smsCust(ph){if(ph)window.location.href=`sms:${ph.replace(/\s/g,'')}`;else toast('No phone number')}
+function navigate(addr){if(addr)window.open(`https://maps.google.com/?q=${encodeURIComponent(addr)}`,'_blank');else toast('No address')}
+
+// ── SMS via Rollo SMS Server ───────────────────────────────────
+const SMS='http://localhost:8743';
+async function sendOnMyWay(jobId){
+  const j=S.jobs().find(x=>x.id===jobId);
+  if(!j){toast('Job not found');return;}
+  const phone=S.custPhone(j.customerId);
+  if(!phone){toast('No customer phone number on file');return;}
+  toast('Sending "On My Way" SMS… 🚗');
+  try{
+    const r=await fetch(SMS+'/sms/on-my-way',{
+      method:'POST',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({
+        jobId:j.id,jobNumber:j.number,
+        customerName:S.custName(j.customerId),
+        customerPhone:phone,
+        engineerName:S.staff(j.staffId).name,
+        eta:20,
+      })
+    });
+    const d=await r.json();
+    toast(d.result?.status==='sent'?'📱 SMS sent to customer ✅':'📱 SMS queued (demo mode)');
+  }catch(e){toast('SMS server offline — start sms-server.js');}
+}
+async function sendRunningLate(jobId){
+  const j=S.jobs().find(x=>x.id===jobId);
+  if(!j) return;
+  const phone=S.custPhone(j.customerId);
+  const eta=prompt('New ETA (e.g. 11:30am):','');
+  if(!eta) return;
+  try{
+    await fetch(SMS+'/sms/running-late',{
+      method:'POST',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({
+        jobId:j.id,jobNumber:j.number,
+        customerName:S.custName(j.customerId),
+        customerPhone:phone,
+        engineerName:S.staff(j.staffId).name,
+        newEta:eta,
+      })
+    });
+    toast('⚠️ Running late SMS sent to customer');
+  }catch(e){toast('SMS server offline');}
+}
+async function sendJobComplete(jobId){
+  const j=S.jobs().find(x=>x.id===jobId);
+  if(!j) return;
+  const phone=S.custPhone(j.customerId);
+  try{
+    await fetch(SMS+'/sms/job-complete',{
+      method:'POST',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({
+        jobId:j.id,jobNumber:j.number,
+        customerName:S.custName(j.customerId),
+        customerPhone:phone,amount:j.amount||0,
+      })
+    });
+    toast('✅ Job complete SMS sent to customer');
+  }catch(e){toast('SMS server offline');}
+}
+
+// ============================================================
+// INBOX SCREEN
+// ============================================================
+function renderInboxScreen(){
+  const el=document.getElementById('screen-inbox');
+  const teamMsgs=[
+    {who:'rollo',msg:'4 jobs scheduled today. JOB-19442 In Progress now.',t:'now',unread:true},
+    {who:'paula',msg:'JOB-19443 confirmed with customer — 10am.',t:'9:02',unread:true},
+    {who:'pamela',msg:'Invoice INV-0090 is overdue — can you chase?',t:'8:45',unread:false},
+    {who:'darren',msg:'Parts ordered for JOB-19448. Arriving tomorrow.',t:'8:30',unread:false},
+    {who:'rollo',msg:'Reminder: Roof repair JOB-19447 scheduled tomorrow.',t:'8:00',unread:false},
+  ];
+  el.innerHTML=`
+    <div class="large-title-bar">
+      <div class="lt-top"><span style="font-size:17px;font-weight:600">Rollo</span></div>
+      <div class="lt-title">Inbox</div>
+    </div>
+    <div class="screen">
+      <div style="height:8px"></div>
+      <div class="list-card">
+        ${teamMsgs.map(m=>{
+          const s=STAFF.find(x=>x.id===m.who)||{name:'Rollo AI',color:'#007AFF',initials:'R'};
+          return `<div class="inbox-row" onclick="S.tab='chat';switchTab('chat')">
+            ${m.unread?`<div class="unread-dot" style="margin-top:18px"></div>`:`<div style="width:10px"></div>`}
+            <div class="inbox-av" style="background:${s.color}">${s.initials}</div>
+            <div class="inbox-body">
+              <div class="inbox-name">${m.who==='rollo'?'Rollo AI ⚔️':s.name}<span class="inbox-time">${m.t}</span></div>
+              <div class="inbox-msg">${m.msg}</div>
+            </div>
+          </div>`;
+        }).join('')}
+      </div>
+    </div>`;
+}
+
+// ============================================================
+// MAP SCREEN
+// ============================================================
+function renderMapScreen(){
+  const el=document.getElementById('screen-map');
+  const todayJobs=S.jobs().filter(j=>j.staffId===S.activeStaff&&j.scheduledDate===today);
+  el.innerHTML=`
+    <div class="nav-bar">
+      <div class="nav-bar-inner">
+        <span class="nav-bar-title">Map</span>
+        <span class="nav-bar-right" onclick="toast('Map filters')">Filter</span>
+      </div>
+    </div>
+    <div class="screen">
+      <div class="map-placeholder" style="height:260px;margin:12px;border-radius:12px">
+        <span style="font-size:48px">🗺️</span>
+        <span>Dublin Area</span>
+        <span style="font-size:13px;color:var(--text3)">${todayJobs.length} jobs today</span>
+      </div>
+      <div class="list-header">Today's Locations</div>
+      <div class="list-card" style="margin:0 16px">
+        ${todayJobs.length===0?`<div style="padding:20px;text-align:center;color:var(--text3);font-size:14px">No jobs today</div>`:
+          todayJobs.map((j,i)=>`<div class="d-row" style="cursor:pointer" onclick="openDetail('${j.id}')">
+            <div class="d-row-ico">${i+1}.</div>
+            <div class="d-row-body"><div class="d-row-val">${S.custName(j.customerId)}</div><div class="d-row-label">${S.custAddr(j.customerId)} · ${j.scheduledTime||'—'}</div></div>
+            <button class="d-row-action" onclick="event.stopPropagation();navigate('${S.custAddr(j.customerId)}')">Go</button>
+          </div>`).join('')}
+      </div>
+    </div>`;
+}
+
+// ============================================================
+// CHAT SCREEN
+// ============================================================
+function renderChatScreen(){
+  const el=document.getElementById('screen-chat');
+  const msgs=S.chatMsgs.slice(-40).map(m=>{
+    const isRollo=m.r==='rollo';
+    const s=isRollo?{color:'#007AFF',initials:'R'}:S.staff(S.activeStaff);
+    return `<div class="chat-msg-row ${isRollo?'':'user'}">
+      ${isRollo?`<div class="chat-av-sm" style="background:${s.color}">${s.initials}</div>`:''}
+      <div class="chat-bub ${isRollo?'rollo':'user'}">${isRollo?`<div class="name">Rollo AI ⚔️</div>`:''}${m.t}</div>
+    </div>`;
+  }).join('');
+  el.innerHTML=`
+    <div class="nav-bar">
+      <div class="nav-bar-inner">
+        <div style="display:flex;align-items:center;gap:10px">
+          <div class="chat-av-sm" style="background:#007AFF;width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700">R</div>
+          <div><div style="font-size:15px;font-weight:600">Rollo AI</div><div style="font-size:11px;color:var(--text3)">⚔️ Always online</div></div>
+        </div>
+      </div>
+    </div>
+    <div class="screen" id="chat-scroll" style="padding:12px 16px;padding-bottom:calc(var(--nav-h) + var(--safe-bottom) + 60px)">
+      ${msgs}
+    </div>
+    <div class="chat-input-bar">
+      <textarea class="chat-inp" id="chat-inp" placeholder="Message Rollo…" rows="1"></textarea>
+      <button class="chat-snd" id="chat-snd">➤</button>
+    </div>`;
+  // scroll to bottom
+  setTimeout(()=>{const s=document.getElementById('chat-scroll');if(s)s.scrollTop=s.scrollHeight},50);
+  // bind send
+  const inp=document.getElementById('chat-inp');
+  const snd=document.getElementById('chat-snd');
+  const send=()=>{
+    const v=inp?.value?.trim();if(!v)return;
+    inp.value='';
+    S.chatMsgs.push({r:'user',t:v});S.save();renderChatScreen();
+    setTimeout(()=>{
+      S.chatMsgs.push({r:'rollo',t:ROLLO[Math.floor(Math.random()*ROLLO.length)]});
+      S.save();renderChatScreen();
+    },900+Math.random()*400);
+  };
+  snd?.addEventListener('click',send);
+  inp?.addEventListener('keydown',e=>{if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();send();}});
+}
+
+// ============================================================
+// MORE/PROFILE SCREEN
+// ============================================================
+function renderMoreScreen(){
+  const el=document.getElementById('screen-more');
+  const me=S.staff(S.activeStaff);
+  const myJobs=S.jobs().filter(j=>j.staffId===S.activeStaff);
+  const todayJobs=myJobs.filter(j=>j.scheduledDate===today);
+  const doneJobs=myJobs.filter(j=>j.status==='Completed'||j.status==='Invoiced');
+  el.innerHTML=`
+    <div class="screen">
+      <div class="profile-header" style="background:${me.color};padding:calc(var(--safe-top) + 20px) 16px 24px">
+        <div class="more-av" style="background:rgba(255,255,255,.25);border:3px solid rgba(255,255,255,.5)">${me.initials}</div>
+        <div class="more-name" style="color:#fff">${me.name}</div>
+        <div class="more-role" style="color:rgba(255,255,255,.75)">${me.id==='trevor'?'Owner / Admin':'Field Engineer'}</div>
+      </div>
+      <div class="more-stats">
+        <div class="more-stat"><div class="ms-val">${todayJobs.length}</div><div class="ms-lab">Today</div></div>
+        <div class="more-stat"><div class="ms-val">${myJobs.length}</div><div class="ms-lab">Total</div></div>
+        <div class="more-stat"><div class="ms-val">${doneJobs.length}</div><div class="ms-lab">Done</div></div>
+      </div>
+      <div style="height:8px"></div>
+      <div class="more-section">
+        <div class="more-row" onclick="window.open('http://localhost:8742/servicem8.html','_blank')">
+          <div class="more-row-ico" style="background:#E8F1FF">🖥️</div><span class="more-row-label">Desktop Dashboard</span><span class="more-row-chevron">›</span>
+        </div>
+        <div class="more-row" onclick="window.open('http://localhost:8741','_blank')">
+          <div class="more-row-ico" style="background:#F3E8FF">⚔️</div><span class="more-row-label">Rollo Ops Hub</span><span class="more-row-chevron">›</span>
+        </div>
+      </div>
+      <div style="height:8px"></div>
+      <div class="more-section">
+        <div class="more-row" onclick="toast('Notifications settings')">
+          <div class="more-row-ico" style="background:#FFE8E8">🔔</div><span class="more-row-label">Notifications</span><span class="more-row-chevron">›</span>
+        </div>
+        <div class="more-row" onclick="toast('Offline mode active ✅')">
+          <div class="more-row-ico" style="background:#E8F8ED">📶</div><span class="more-row-label">Offline Mode</span><div class="more-row-sub" style="margin-right:6px">Active</div><span class="more-row-chevron">›</span>
+        </div>
+        <div class="more-row" onclick="toast('Settings coming soon')">
+          <div class="more-row-ico" style="background:#F2F2F7">⚙️</div><span class="more-row-label">Settings</span><span class="more-row-chevron">›</span>
+        </div>
+      </div>
+      <div style="height:8px"></div>
+      <div class="more-section">
+        <div class="more-row">
+          <div class="more-row-ico" style="background:#E8F1FF">📱</div>
+          <div style="flex:1"><div class="more-row-label">Install as App</div><div style="font-size:12px;color:var(--text3);margin-top:1px">Share → Add to Home Screen</div></div>
+        </div>
+      </div>
+      <div style="padding:24px;text-align:center;color:var(--text3);font-size:13px">
+        ⚔️ Rollo Field Services v1.0<br/>PWA — works offline
+      </div>
+    </div>`;
+}
+
+// ============================================================
+// NEW JOB SHEET
+// ============================================================
+function openSheet(){
+  const custs=S.custs();
+  document.getElementById('nj-customer').innerHTML=custs.map(c=>`<option value="${c.id}">${c.first} ${c.last}</option>`).join('');
+  document.getElementById('nj-type').innerHTML=JOB_TYPES.map(t=>`<option>${t}</option>`).join('');
+  document.getElementById('nj-staff').innerHTML=STAFF.map(s=>`<option value="${s.id}" ${s.id===S.activeStaff?'selected':''}>${s.name}</option>`).join('');
+  document.getElementById('nj-date').value=today;
+  document.getElementById('new-job-sheet').style.display='block';
+}
+function closeSheet(){document.getElementById('new-job-sheet').style.display='none'}
+function saveNewJob(){
+  const custId=document.getElementById('nj-customer').value;
+  if(!custId){toast('Please select a customer');return;}
+  const jobs=S.jobs();
+  const newNum=Math.max(19439,...jobs.map(j=>j.number||0))+1;
+  const j={
+    id:uid(),number:newNum,
+    type:document.getElementById('nj-type').value,
+    status:'Work Order',
+    customerId:custId,
+    staffId:document.getElementById('nj-staff').value,
+    scheduledDate:document.getElementById('nj-date').value,
+    scheduledTime:document.getElementById('nj-time')?.value||'09:00',
+    duration:60,
+    amount:parseFloat(document.getElementById('nj-amount').value)||0,
+    notes:document.getElementById('nj-notes').value,
+    createdAt:Date.now(),
+  };
+  jobs.unshift(j);localStorage.setItem('ros_jobs',JSON.stringify(jobs));
+  closeSheet();switchTab('jobs');toast(`✅ Job #${newNum} created`);
+}
+
+// ============================================================
+// TAB SWITCHING
+// ============================================================
+function switchTab(tab){
+  S.tab=tab;
+  const screens={jobs:'screen-jobs',inbox:'screen-inbox',map:'screen-map',chat:'screen-chat',more:'screen-more'};
+  Object.values(screens).forEach(id=>{const el=document.getElementById(id);if(el)el.style.display='none';});
+  const target=screens[tab];
+  if(target){const el=document.getElementById(target);if(el)el.style.display='flex';}
+  document.querySelectorAll('.tab-item[data-tab]').forEach(t=>t.classList.remove('active'));
+  document.querySelectorAll(`.tab-item[data-tab="${tab}"]`).forEach(t=>t.classList.add('active'));
+  const renders={jobs:renderJobsScreen,inbox:renderInboxScreen,map:renderMapScreen,chat:renderChatScreen,more:renderMoreScreen};
+  (renders[tab]||renderJobsScreen)();
+}
+
+// ============================================================
+// INIT
+// ============================================================
+document.addEventListener('DOMContentLoaded',()=>{
+  S.load();
+  switchTab('jobs');
+
+  document.querySelectorAll('.tab-item[data-tab]').forEach(t=>{
+    t.addEventListener('click',()=>switchTab(t.dataset.tab));
+  });
+  document.getElementById('tab-new').addEventListener('click',openSheet);
+
+  if('serviceWorker' in navigator) navigator.serviceWorker.register('/sw.js').catch(()=>{});
+});
+</script>
+</body>
+</html>

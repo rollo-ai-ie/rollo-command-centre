@@ -1,0 +1,703 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>Rollo — On-Time Guarantee</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --blue:#2563eb;--blue-lt:#eff6ff;--green:#16a34a;--green-lt:#f0fdf4;
+  --orange:#ea580c;--orange-lt:#fff7ed;--red:#dc2626;--red-lt:#fef2f2;
+  --purple:#7c3aed;--purple-lt:#f5f3ff;--gray:#64748b;
+  --bg:#f8fafc;--card:#fff;--border:#e2e8f0;--text:#0f172a;--muted:#64748b;
+}
+body{font-family:-apple-system,'Helvetica Neue',sans-serif;background:var(--bg);color:var(--text);font-size:14px;-webkit-font-smoothing:antialiased}
+
+/* layout */
+.shell{display:flex;min-height:100vh}
+.sidebar{width:220px;background:#0f172a;flex-shrink:0;display:flex;flex-direction:column;padding:20px 0}
+.sb-logo{padding:0 20px 24px;font-size:18px;font-weight:800;color:#fff;letter-spacing:-.4px}
+.sb-logo span{color:#818cf8}
+.sb-link{display:flex;align-items:center;gap:10px;padding:10px 20px;color:#94a3b8;font-size:14px;font-weight:500;cursor:pointer;transition:all .15s;text-decoration:none}
+.sb-link:hover,.sb-link.active{background:rgba(255,255,255,.06);color:#fff}
+.sb-link .ico{font-size:16px;width:20px;text-align:center}
+.sb-divider{border:none;border-top:1px solid rgba(255,255,255,.06);margin:10px 20px}
+.main{flex:1;display:flex;flex-direction:column;overflow-x:hidden}
+
+/* top bar */
+.topbar{background:var(--card);border-bottom:1px solid var(--border);padding:0 32px;height:60px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0}
+.topbar h1{font-size:18px;font-weight:700;letter-spacing:-.3px}
+.topbar-right{display:flex;align-items:center;gap:12px}
+.btn{padding:8px 16px;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;border:none;transition:all .15s}
+.btn-primary{background:var(--blue);color:#fff}
+.btn-primary:hover{background:#1d4ed8}
+.btn-ghost{background:transparent;color:var(--blue);border:1.5px solid var(--blue)}
+.btn-green{background:var(--green);color:#fff}
+.btn-red{background:var(--red);color:#fff}
+.btn-orange{background:var(--orange);color:#fff}
+
+/* content */
+.content{padding:28px 32px;flex:1;overflow-y:auto}
+.page-header{margin-bottom:24px}
+.page-title{font-size:26px;font-weight:800;letter-spacing:-.5px}
+.page-sub{font-size:14px;color:var(--muted);margin-top:4px}
+
+/* stats row */
+.stats-row{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:28px}
+.stat-card{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:18px 20px}
+.stat-label{font-size:12px;font-weight:600;text-transform:uppercase;letter-spacing:.5px;color:var(--muted)}
+.stat-val{font-size:32px;font-weight:800;letter-spacing:-.8px;margin:6px 0 4px;line-height:1}
+.stat-sub{font-size:12px;color:var(--muted)}
+
+/* two-col layout */
+.cols{display:grid;grid-template-columns:1fr 360px;gap:20px;align-items:start}
+
+/* card */
+.card{background:var(--card);border:1px solid var(--border);border-radius:12px;overflow:hidden;margin-bottom:20px}
+.card-header{padding:16px 20px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between}
+.card-title{font-size:15px;font-weight:700;letter-spacing:-.2px}
+.card-body{padding:0}
+
+/* claim rows */
+.claim-row{display:flex;align-items:flex-start;gap:14px;padding:16px 20px;border-bottom:1px solid var(--border);transition:background .15s}
+.claim-row:last-child{border-bottom:none}
+.claim-row:hover{background:#fafafa}
+.claim-status-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0;margin-top:5px}
+.claim-body{flex:1;min-width:0}
+.claim-title{font-size:14px;font-weight:700;margin-bottom:2px}
+.claim-meta{font-size:12px;color:var(--muted);line-height:1.6}
+.claim-amount{font-size:15px;font-weight:700;color:var(--orange);flex-shrink:0;white-space:nowrap}
+.claim-actions{display:flex;gap:6px;margin-top:8px}
+
+/* badge */
+.badge{display:inline-flex;align-items:center;padding:3px 10px;border-radius:12px;font-size:11px;font-weight:700;letter-spacing:.2px}
+.badge-pending{background:#fff3e0;color:#e65100}
+.badge-approved{background:var(--green-lt);color:var(--green)}
+.badge-rejected{background:var(--red-lt);color:var(--red)}
+.badge-active{background:var(--blue-lt);color:var(--blue)}
+
+/* SMS log */
+.sms-row{display:flex;gap:10px;padding:12px 20px;border-bottom:1px solid var(--border);font-size:13px}
+.sms-row:last-child{border-bottom:none}
+.sms-dir{width:60px;flex-shrink:0}
+.sms-to{width:110px;flex-shrink:0;color:var(--muted);font-family:monospace;font-size:12px}
+.sms-body{flex:1;color:var(--text);line-height:1.5}
+.sms-time{flex-shrink:0;color:var(--muted);font-size:11px;white-space:nowrap}
+.sms-status-badge{font-size:10px;font-weight:700;padding:2px 7px;border-radius:8px;white-space:nowrap}
+.ss-sent{background:#dcfce7;color:#16a34a}
+.ss-demo{background:#f0f9ff;color:#0369a1}
+.ss-failed{background:#fee2e2;color:#dc2626}
+.ss-inbound{background:#f5f3ff;color:#7c3aed}
+
+/* T&C section */
+.tc-section{margin-bottom:16px}
+.tc-title{font-size:13px;font-weight:700;color:var(--text);margin-bottom:8px;display:flex;align-items:center;gap:6px}
+.tc-list{list-style:none;display:flex;flex-direction:column;gap:6px}
+.tc-list li{font-size:13px;color:var(--muted);padding-left:18px;position:relative;line-height:1.5}
+.tc-list li::before{content:'•';position:absolute;left:0;color:var(--blue);font-weight:700}
+.tc-list.excl li::before{color:var(--red);content:'✕'}
+
+/* config form */
+.config-field{margin-bottom:14px}
+.config-field label{display:block;font-size:12px;font-weight:600;color:var(--muted);margin-bottom:4px;text-transform:uppercase;letter-spacing:.5px}
+.config-field input{width:100%;border:1.5px solid var(--border);border-radius:8px;padding:9px 12px;font-size:14px;outline:none;font-family:inherit;transition:border-color .15s}
+.config-field input:focus{border-color:var(--blue)}
+.config-field .hint{font-size:11px;color:var(--muted);margin-top:4px}
+
+/* timeline */
+.timeline{padding:16px 20px;display:flex;flex-direction:column;gap:0}
+.tl-item{display:flex;gap:12px}
+.tl-left{display:flex;flex-direction:column;align-items:center;width:28px;flex-shrink:0}
+.tl-dot{width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:13px;flex-shrink:0;border:2px solid var(--bg);z-index:1}
+.tl-line{width:2px;flex:1;background:var(--border);margin:4px 0}
+.tl-right{flex:1;padding-bottom:20px}
+.tl-title{font-size:13px;font-weight:700;margin-bottom:2px}
+.tl-sub{font-size:12px;color:var(--muted);line-height:1.5}
+
+/* modal */
+.modal-backdrop{display:none;position:fixed;inset:0;background:rgba(0,0,0,.4);z-index:50;align-items:center;justify-content:center}
+.modal-backdrop.open{display:flex}
+.modal{background:var(--card);border-radius:14px;padding:0;width:480px;max-width:calc(100vw - 32px);box-shadow:0 20px 60px rgba(0,0,0,.2)}
+.modal-header{padding:20px 24px 16px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between}
+.modal-header h3{font-size:16px;font-weight:700}
+.modal-close{background:none;border:none;font-size:20px;cursor:pointer;color:var(--muted)}
+.modal-body{padding:20px 24px}
+.modal-footer{padding:16px 24px;border-top:1px solid var(--border);display:flex;gap:10px;justify-content:flex-end}
+
+/* tab bar */
+.tab-bar{display:flex;gap:0;border-bottom:1px solid var(--border);margin-bottom:20px}
+.tab{padding:10px 20px;font-size:14px;font-weight:600;cursor:pointer;color:var(--muted);border-bottom:2.5px solid transparent;transition:all .15s}
+.tab.active{color:var(--blue);border-bottom-color:var(--blue)}
+
+/* mode indicator */
+.mode-banner{display:flex;align-items:center;gap:10px;background:#fff7ed;border:1px solid #fed7aa;border-radius:10px;padding:12px 16px;margin-bottom:20px;font-size:13px}
+.mode-banner.live{background:var(--green-lt);border-color:#bbf7d0;color:var(--green)}
+.mode-banner.demo{background:#fff7ed;border-color:#fed7aa;color:#c2410c}
+
+table{width:100%;border-collapse:collapse}
+th{text-align:left;padding:10px 20px;font-size:12px;font-weight:600;text-transform:uppercase;letter-spacing:.5px;color:var(--muted);border-bottom:1px solid var(--border);background:#fafafa}
+td{padding:12px 20px;border-bottom:1px solid var(--border);font-size:13px}
+tr:last-child td{border-bottom:none}
+tr:hover td{background:#fafafa}
+</style>
+</head>
+<body>
+<div class="shell">
+
+<!-- Sidebar -->
+<div class="sidebar">
+  <div class="sb-logo">⚔️ <span>Rollo</span></div>
+  <a class="sb-link" href="http://localhost:8741">🏠 Ops Hub</a>
+  <a class="sb-link" href="servicem8.html">📋 ServiceM8</a>
+  <a class="sb-link" href="engineer.html">📱 Engineer App</a>
+  <hr class="sb-divider"/>
+  <div class="sb-link active" onclick="showTab('claims')"><span class="ico">🛡️</span> Guarantee</div>
+  <div class="sb-link" onclick="showTab('sms')"><span class="ico">💬</span> SMS Log</div>
+  <div class="sb-link" onclick="showTab('tc')"><span class="ico">📄</span> T&Cs</div>
+  <div class="sb-link" onclick="showTab('config')"><span class="ico">⚙️</span> Settings</div>
+  <hr class="sb-divider"/>
+  <div class="sb-link" onclick="sendTestSMS()"><span class="ico">🧪</span> Test SMS</div>
+</div>
+
+<!-- Main -->
+<div class="main">
+  <div class="topbar">
+    <h1 id="page-title">On-Time Guarantee</h1>
+    <div class="topbar-right">
+      <div id="mode-pill" style="font-size:12px;font-weight:700;padding:5px 12px;border-radius:20px;background:#fff3e0;color:#c2410c">🟡 Demo Mode</div>
+      <button class="btn btn-primary" onclick="showTab('config')">⚙️ Connect Twilio</button>
+    </div>
+  </div>
+
+  <div class="content">
+
+    <!-- ── CLAIMS TAB ── -->
+    <div id="tab-claims">
+      <div class="page-header">
+        <div class="page-title">Guarantee Claims</div>
+        <div class="page-sub">€100 cap per customer · 2-hour arrival window · Office approval required</div>
+      </div>
+
+      <div class="stats-row">
+        <div class="stat-card">
+          <div class="stat-label">Pending Review</div>
+          <div class="stat-val" id="stat-pending" style="color:var(--orange)">0</div>
+          <div class="stat-sub">Awaiting your decision</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Approved This Month</div>
+          <div class="stat-val" id="stat-approved" style="color:var(--green)">0</div>
+          <div class="stat-sub">Compensation paid</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Total Paid Out</div>
+          <div class="stat-val" id="stat-payout" style="color:var(--red)">€0</div>
+          <div class="stat-sub">This month</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">SMS Sent Today</div>
+          <div class="stat-val" id="stat-sms" style="color:var(--blue)">0</div>
+          <div class="stat-sub">Outbound messages</div>
+        </div>
+      </div>
+
+      <div class="cols">
+        <div>
+          <div class="card">
+            <div class="card-header">
+              <span class="card-title">⏳ Pending Claims</span>
+              <button class="btn btn-ghost" onclick="refreshClaims()" style="padding:5px 12px;font-size:12px">Refresh</button>
+            </div>
+            <div class="card-body" id="claims-list">
+              <div style="padding:40px;text-align:center;color:var(--muted)">
+                <div style="font-size:40px;margin-bottom:10px">🛡️</div>
+                <div style="font-weight:700;margin-bottom:4px">No pending claims</div>
+                <div style="font-size:12px">Claims appear here when an engineer misses an appointment window</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="card-header"><span class="card-title">✅ Resolved Claims</span></div>
+            <div class="card-body" id="resolved-list">
+              <div style="padding:24px;text-align:center;color:var(--muted);font-size:13px">No resolved claims yet</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Right: How it works -->
+        <div>
+          <div class="card" style="margin-bottom:20px">
+            <div class="card-header"><span class="card-title">⚙️ How the Guarantee Works</span></div>
+            <div class="timeline">
+              <div class="tl-item">
+                <div class="tl-left"><div class="tl-dot" style="background:#eff6ff;color:#2563eb">1</div><div class="tl-line"></div></div>
+                <div class="tl-right"><div class="tl-title">Customer books appointment</div><div class="tl-sub">Confirmation SMS sent with 2-hour arrival window. Customer replies YES to activate guarantee.</div></div>
+              </div>
+              <div class="tl-item">
+                <div class="tl-left"><div class="tl-dot" style="background:#f0fdf4;color:#16a34a">2</div><div class="tl-line"></div></div>
+                <div class="tl-right"><div class="tl-title">Engineer taps "On My Way"</div><div class="tl-sub">App sends automatic SMS to customer. System starts arrival timer.</div></div>
+              </div>
+              <div class="tl-item">
+                <div class="tl-left"><div class="tl-dot" style="background:#fff7ed;color:#ea580c">3</div><div class="tl-line"></div></div>
+                <div class="tl-right"><div class="tl-title">Window closes — no check-in</div><div class="tl-sub">+15 mins: Office alerted. +30 mins: Potential claim logged automatically.</div></div>
+              </div>
+              <div class="tl-item">
+                <div class="tl-left"><div class="tl-dot" style="background:#fef2f2;color:#dc2626">4</div><div class="tl-line"></div></div>
+                <div class="tl-right"><div class="tl-title">Office reviews claim</div><div class="tl-sub">Review exclusions (weather, traffic, customer no-show). Approve or reject with one click.</div></div>
+              </div>
+              <div class="tl-item">
+                <div class="tl-left"><div class="tl-dot" style="background:#f5f3ff;color:#7c3aed">5</div></div>
+                <div class="tl-right"><div class="tl-title">Compensation issued</div><div class="tl-sub">Max €100. Customer receives SMS confirmation. Credit note issued in system.</div></div>
+              </div>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="card-header"><span class="card-title">📊 This Month</span></div>
+            <div style="padding:16px 20px">
+              <div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--border);font-size:13px"><span>Jobs completed</span><span id="m-completed" style="font-weight:700">—</span></div>
+              <div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--border);font-size:13px"><span>SMS sent</span><span id="m-sms" style="font-weight:700">—</span></div>
+              <div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--border);font-size:13px"><span>Customer replies</span><span id="m-replies" style="font-weight:700">—</span></div>
+              <div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--border);font-size:13px;color:var(--orange)"><span>Guarantee claims</span><span id="m-claims" style="font-weight:700">0</span></div>
+              <div style="display:flex;justify-content:space-between;padding:8px 0;font-size:13px;font-weight:700;color:var(--red)"><span>Total compensation paid</span><span id="m-total">€0.00</span></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── SMS LOG TAB ── -->
+    <div id="tab-sms" style="display:none">
+      <div class="page-header">
+        <div class="page-title">SMS Log</div>
+        <div class="page-sub">All outbound and inbound messages</div>
+      </div>
+      <div class="mode-banner demo" id="sms-mode-banner">
+        🟡 <strong>Demo Mode</strong> — SMS are logged but not sent. Add your Twilio credentials in Settings to go live.
+      </div>
+      <div class="card">
+        <div class="card-header">
+          <span class="card-title">Messages</span>
+          <button class="btn btn-ghost" style="padding:5px 12px;font-size:12px" onclick="refreshSMSLog()">Refresh</button>
+        </div>
+        <div id="sms-log-body">
+          <div style="padding:40px;text-align:center;color:var(--muted)">
+            <div style="font-size:40px;margin-bottom:8px">💬</div>
+            <div style="font-weight:700">No messages yet</div>
+            <div style="font-size:12px;margin-top:4px">SMS log will appear here once messages are sent</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── T&C TAB ── -->
+    <div id="tab-tc" style="display:none">
+      <div class="page-header">
+        <div class="page-title">On-Time Guarantee — Terms & Conditions</div>
+        <div class="page-sub">Review and customise before going live · Have your solicitor review the final version</div>
+      </div>
+      <div class="cols">
+        <div>
+          <div class="card">
+            <div class="card-header">
+              <span class="card-title">📋 Guarantee Terms</span>
+              <button class="btn btn-primary" onclick="copyTC()" style="padding:6px 14px;font-size:12px">Copy Text</button>
+            </div>
+            <div style="padding:20px 24px" id="tc-text">
+              <div class="tc-section">
+                <div class="tc-title" style="color:var(--blue)">🛡️ Our On-Time Guarantee</div>
+                <p style="font-size:13px;color:var(--muted);line-height:1.7;margin-bottom:12px">
+                  At Rollo Heating & Plumbing, we respect your time. If our engineer does not arrive within the agreed 2-hour arrival window for a scheduled appointment, you may be entitled to compensation of up to <strong>€100</strong>, subject to the terms below.
+                </p>
+              </div>
+
+              <div class="tc-section">
+                <div class="tc-title">✅ What qualifies</div>
+                <ul class="tc-list">
+                  <li>Your appointment was pre-booked (not an emergency call-out)</li>
+                  <li>You confirmed the appointment via our SMS confirmation link</li>
+                  <li>You were present and accessible at the property during the arrival window</li>
+                  <li>The engineer did not arrive within the agreed 2-hour window</li>
+                  <li>No notification of delay was received from us before the window closed</li>
+                  <li>Your claim is submitted within 48 hours of the missed appointment</li>
+                </ul>
+              </div>
+
+              <div class="tc-section" style="margin-top:16px">
+                <div class="tc-title" style="color:var(--red)">✕ Exclusions — guarantee does not apply if:</div>
+                <ul class="tc-list excl">
+                  <li>Met Éireann issued a Status Orange or Red weather warning for your county on the day</li>
+                  <li>A road closure, major traffic incident, or emergency works blocked access (AA Roadwatch logged)</li>
+                  <li>You were not home or accessible when the engineer arrived or attempted to contact you</li>
+                  <li>You provided an incorrect address, access code, or entry instructions</li>
+                  <li>You cancelled or rescheduled within 24 hours of your appointment</li>
+                  <li>A previous job on the engineer's schedule overran by 90 minutes or more, and you received an SMS notification of the delay</li>
+                  <li>Access to the property was blocked by circumstances outside our control (utilities, parking restrictions, etc.)</li>
+                  <li>The appointment was an emergency or same-day call-out (fixed times not guaranteed)</li>
+                  <li>The claim relates to a follow-up visit rather than the initial appointment</li>
+                  <li>You have submitted a claim for the same property within the previous 12 months</li>
+                </ul>
+              </div>
+
+              <div class="tc-section" style="margin-top:16px">
+                <div class="tc-title">💰 Compensation</div>
+                <ul class="tc-list">
+                  <li>Maximum compensation: <strong>€100 per incident</strong></li>
+                  <li>Issued as a credit note against future work, or refund of deposit paid</li>
+                  <li>Cannot be combined with any other discount or offer</li>
+                  <li>One claim per customer per 12-month period</li>
+                  <li>Rollo Heating & Plumbing reserves the right to investigate and approve or reject any claim</li>
+                  <li>Our decision is final</li>
+                </ul>
+              </div>
+
+              <div class="tc-section" style="margin-top:16px">
+                <div class="tc-title">📝 How to Claim</div>
+                <ul class="tc-list">
+                  <li>Reply CLAIM to any of our SMS messages within 48 hours</li>
+                  <li>Or call our office on 01-XXX-XXXX and quote your job reference number</li>
+                  <li>We will review your claim within 2 working days</li>
+                  <li>Approved claims processed within 5 working days</li>
+                </ul>
+              </div>
+
+              <div style="margin-top:20px;padding:14px;background:#f8fafc;border-radius:8px;border:1px solid var(--border)">
+                <div style="font-size:12px;font-weight:700;color:var(--muted);margin-bottom:4px">⚠️ LEGAL NOTE</div>
+                <div style="font-size:12px;color:var(--muted);line-height:1.6">These are draft terms for review purposes only. Before publishing this guarantee, have your solicitor review the final version. Ensure your public liability insurance covers compensation payments and that your T&Cs are registered where required under Irish consumer law.</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div>
+          <div class="card">
+            <div class="card-header"><span class="card-title">💡 Tips for staying protected</span></div>
+            <div style="padding:16px 20px;display:flex;flex-direction:column;gap:12px">
+              <div style="padding:12px;background:#f0fdf4;border-radius:8px;font-size:13px;line-height:1.5">
+                <strong style="color:var(--green)">✅ Always get SMS confirmation</strong><br/>
+                A customer who replies YES has confirmed they'll be home. If they don't reply, the guarantee doesn't activate.
+              </div>
+              <div style="padding:12px;background:#eff6ff;border-radius:8px;font-size:13px;line-height:1.5">
+                <strong style="color:var(--blue)">📱 Engineer checks in via app</strong><br/>
+                GPS check-in timestamps prove the engineer arrived. No check-in = potential claim. Always check in.
+              </div>
+              <div style="padding:12px;background:#fff7ed;border-radius:8px;font-size:13px;line-height:1.5">
+                <strong style="color:var(--orange)">⏰ Notify early if running late</strong><br/>
+                Sending a "running late" SMS before the window closes cancels any claim — and customers appreciate honesty.
+              </div>
+              <div style="padding:12px;background:#fef2f2;border-radius:8px;font-size:13px;line-height:1.5">
+                <strong style="color:var(--red)">🚫 Emergency jobs are excluded</strong><br/>
+                Same-day call-outs don't carry the guarantee. Make sure your booking form is clear about job type.
+              </div>
+              <div style="padding:12px;background:#f5f3ff;border-radius:8px;font-size:13px;line-height:1.5">
+                <strong style="color:var(--purple)">📊 Track your claims rate</strong><br/>
+                Target: 0 claims per month. If claims appear, it's a scheduling or routing problem — fix the root cause.
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── CONFIG TAB ── -->
+    <div id="tab-config" style="display:none">
+      <div class="page-header">
+        <div class="page-title">Settings & Twilio Setup</div>
+        <div class="page-sub">Connect your Twilio account to send real SMS messages</div>
+      </div>
+      <div class="cols">
+        <div>
+          <div class="card">
+            <div class="card-header"><span class="card-title">📱 Twilio Credentials</span></div>
+            <div style="padding:20px 24px">
+              <div class="mode-banner demo" id="config-mode">
+                🟡 Currently in Demo Mode — SMS are logged but not sent
+              </div>
+              <div class="config-field">
+                <label>Account SID</label>
+                <input type="text" id="cfg-sid" placeholder="ACxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"/>
+                <div class="hint">Found in your Twilio Console dashboard</div>
+              </div>
+              <div class="config-field">
+                <label>Auth Token</label>
+                <input type="password" id="cfg-token" placeholder="Your Twilio auth token"/>
+                <div class="hint">Keep this secret — never share it</div>
+              </div>
+              <div class="config-field">
+                <label>Your Twilio Irish Number</label>
+                <input type="text" id="cfg-from" placeholder="+353XXXXXXXXX"/>
+                <div class="hint">The Irish mobile number you purchased on Twilio (~€1/month)</div>
+              </div>
+              <div class="config-field">
+                <label>Company Phone (for SMS footer)</label>
+                <input type="text" id="cfg-phone" placeholder="01-XXX-XXXX"/>
+              </div>
+              <button class="btn btn-primary" onclick="saveConfig()" style="width:100%;padding:12px;font-size:14px;margin-top:4px">Save & Connect Twilio</button>
+            </div>
+          </div>
+        </div>
+
+        <div>
+          <div class="card">
+            <div class="card-header"><span class="card-title">📋 Setup Checklist</span></div>
+            <div style="padding:16px 20px;display:flex;flex-direction:column;gap:10px;font-size:13px">
+              <div style="display:flex;gap:10px;align-items:flex-start"><span>1️⃣</span><div><strong>Sign up for Twilio</strong><br/><span style="color:var(--muted)">Free trial gives ~€15 credit. No card needed to start.<br/><a href="https://www.twilio.com/try-twilio" target="_blank" style="color:var(--blue)">twilio.com/try-twilio →</a></span></div></div>
+              <div style="display:flex;gap:10px;align-items:flex-start"><span>2️⃣</span><div><strong>Buy an Irish number</strong><br/><span style="color:var(--muted)">Console → Phone Numbers → Buy a Number → Filter by Ireland (+353). Costs ~€1/month.</span></div></div>
+              <div style="display:flex;gap:10px;align-items:flex-start"><span>3️⃣</span><div><strong>Set inbound webhook</strong><br/><span style="color:var(--muted)">On your Twilio number, set the "A Message Comes In" webhook to:<br/><code style="background:#f1f5f9;padding:2px 6px;border-radius:4px;font-size:11px">http://YOUR-IP:8743/sms/inbound</code></span></div></div>
+              <div style="display:flex;gap:10px;align-items:flex-start"><span>4️⃣</span><div><strong>Add credentials above</strong><br/><span style="color:var(--muted)">Enter your Account SID, Auth Token, and phone number, then click Save.</span></div></div>
+              <div style="display:flex;gap:10px;align-items:flex-start"><span>5️⃣</span><div><strong>Send a test SMS</strong><br/><span style="color:var(--muted)">Use the sidebar "Test SMS" link to send yourself a message and confirm it's working.</span></div></div>
+            </div>
+          </div>
+
+          <div class="card" style="margin-top:16px">
+            <div class="card-header"><span class="card-title">💰 Twilio Costs (estimate)</span></div>
+            <div style="padding:16px 20px">
+              <table>
+                <tr><td>Irish number</td><td style="text-align:right;font-weight:600">~€1/month</td></tr>
+                <tr><td>Outbound SMS (Ireland)</td><td style="text-align:right;font-weight:600">~€0.07 each</td></tr>
+                <tr><td>Inbound SMS</td><td style="text-align:right;font-weight:600">~€0.01 each</td></tr>
+                <tr><td>50 jobs/month (3 SMS each)</td><td style="text-align:right;font-weight:600;color:var(--green)">~€12/month</td></tr>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- /content -->
+</div><!-- /main -->
+</div><!-- /shell -->
+
+<!-- Resolve Modal -->
+<div class="modal-backdrop" id="resolve-modal">
+  <div class="modal">
+    <div class="modal-header">
+      <h3>Review Guarantee Claim</h3>
+      <button class="modal-close" onclick="closeModal()">✕</button>
+    </div>
+    <div class="modal-body">
+      <div id="modal-claim-info" style="background:#f8fafc;border-radius:8px;padding:14px;margin-bottom:16px;font-size:13px;line-height:1.7"></div>
+      <div class="config-field">
+        <label>Resolution Notes (optional)</label>
+        <input type="text" id="modal-notes" placeholder="e.g. Engineer delayed by traffic on M50, not eligible"/>
+      </div>
+      <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:4px">
+        <div style="flex:1;padding:12px;border:1.5px solid var(--border);border-radius:8px;font-size:12px;line-height:1.5">
+          <strong style="color:var(--green)">✅ Approve</strong><br/>€100 credit note issued. Customer gets SMS confirmation.
+        </div>
+        <div style="flex:1;padding:12px;border:1.5px solid var(--border);border-radius:8px;font-size:12px;line-height:1.5">
+          <strong style="color:var(--red)">❌ Reject</strong><br/>Claim not eligible (check exclusions). No payment. Log reason.
+        </div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn" style="background:#f1f5f9;color:var(--text)" onclick="closeModal()">Cancel</button>
+      <button class="btn btn-red" onclick="resolveClaim('rejected')">Reject Claim</button>
+      <button class="btn btn-green" onclick="resolveClaim('approved')">✅ Approve €100</button>
+    </div>
+  </div>
+</div>
+
+<script>
+const SMS_API = 'http://localhost:8743';
+let currentClaimId = null;
+let currentTab = 'claims';
+
+// ── Tab switching ──────────────────────────────────────────────
+function showTab(t) {
+  currentTab = t;
+  ['claims','sms','tc','config'].forEach(id => {
+    document.getElementById('tab-'+id).style.display = id===t ? '' : 'none';
+  });
+  document.querySelectorAll('.sb-link').forEach(l => l.classList.remove('active'));
+  if(t==='claims') refreshClaims();
+  if(t==='sms')    refreshSMSLog();
+  checkServerMode();
+}
+
+// ── Server status ──────────────────────────────────────────────
+async function checkServerMode() {
+  try {
+    const r = await fetch(SMS_API+'/status');
+    const d = await r.json();
+    const isLive = d.mode === 'live';
+    document.getElementById('mode-pill').textContent = isLive ? '🟢 Live Mode' : '🟡 Demo Mode';
+    document.getElementById('mode-pill').style.background = isLive ? '#dcfce7' : '#fff3e0';
+    document.getElementById('mode-pill').style.color = isLive ? '#16a34a' : '#c2410c';
+    const smsBanner = document.getElementById('sms-mode-banner');
+    if(smsBanner) { smsBanner.className = 'mode-banner '+(isLive?'live':'demo'); smsBanner.innerHTML = isLive ? '🟢 <strong>Live Mode</strong> — Real SMS being sent via Twilio' : '🟡 <strong>Demo Mode</strong> — SMS are logged but not sent. Add Twilio credentials in Settings.'; }
+  } catch(e) {
+    document.getElementById('mode-pill').textContent = '🔴 Server offline';
+    document.getElementById('mode-pill').style.background = '#fee2e2';
+    document.getElementById('mode-pill').style.color = '#dc2626';
+  }
+}
+
+// ── Claims ─────────────────────────────────────────────────────
+async function refreshClaims() {
+  try {
+    const r = await fetch(SMS_API+'/guarantee/claims');
+    const d = await r.json();
+    const pending = d.claims.filter(c=>c.status==='pending_review');
+    const approved = d.claims.filter(c=>c.status==='approved');
+    const rejected = d.claims.filter(c=>c.status==='rejected');
+    const totalPaid = approved.reduce((s,c)=>s+(c.compensationAmount||0),0);
+
+    document.getElementById('stat-pending').textContent = pending.length;
+    document.getElementById('stat-approved').textContent = approved.length;
+    document.getElementById('stat-payout').textContent = '€'+totalPaid.toFixed(0);
+    document.getElementById('m-claims').textContent = d.claims.length;
+    document.getElementById('m-total').textContent = '€'+totalPaid.toFixed(2);
+
+    const cl = document.getElementById('claims-list');
+    cl.innerHTML = pending.length === 0
+      ? `<div style="padding:40px;text-align:center;color:var(--muted)"><div style="font-size:40px;margin-bottom:10px">🛡️</div><div style="font-weight:700;margin-bottom:4px">No pending claims</div><div style="font-size:12px">Claims appear here when an engineer misses an appointment window</div></div>`
+      : pending.map(c=>`
+          <div class="claim-row">
+            <div class="claim-status-dot" style="background:#f97316"></div>
+            <div class="claim-body">
+              <div class="claim-title">Job #${c.jobNumber} — ${c.customerName||'Customer'}</div>
+              <div class="claim-meta">
+                📞 ${c.customerPhone||'—'} &nbsp;·&nbsp; Triggered ${new Date(c.triggeredAt).toLocaleString('en-IE')}<br/>
+                Cap: €${c.capAmount} &nbsp;·&nbsp; <span class="badge badge-pending">Pending Review</span>
+              </div>
+              <div class="claim-actions">
+                <button class="btn btn-green" style="padding:5px 12px;font-size:12px" onclick="openModal('${c.id}','${c.jobNumber}','${c.customerName||'Customer'}','${c.capAmount}')">Review & Resolve</button>
+              </div>
+            </div>
+            <div class="claim-amount">€${c.capAmount}</div>
+          </div>`).join('');
+
+    const rl = document.getElementById('resolved-list');
+    rl.innerHTML = [...approved,...rejected].length === 0
+      ? `<div style="padding:24px;text-align:center;color:var(--muted);font-size:13px">No resolved claims yet</div>`
+      : [...approved,...rejected].map(c=>`
+          <div class="claim-row">
+            <div class="claim-status-dot" style="background:${c.status==='approved'?'#16a34a':'#dc2626'}"></div>
+            <div class="claim-body">
+              <div class="claim-title">Job #${c.jobNumber} — ${c.customerName||'Customer'}</div>
+              <div class="claim-meta">
+                Resolved ${c.resolvedAt?new Date(c.resolvedAt).toLocaleDateString('en-IE'):''} &nbsp;·&nbsp;
+                <span class="badge ${c.status==='approved'?'badge-approved':'badge-rejected'}">${c.status==='approved'?'Approved':'Rejected'}</span>
+                ${c.resolutionNotes?`<br/>${c.resolutionNotes}`:''}
+              </div>
+            </div>
+            <div class="claim-amount" style="color:${c.status==='approved'?'var(--red)':'var(--muted)'}">
+              ${c.status==='approved'?'-€'+(c.compensationAmount||0):'€0'}
+            </div>
+          </div>`).join('');
+  } catch(e) {
+    document.getElementById('claims-list').innerHTML = '<div style="padding:24px;text-align:center;color:var(--muted)">⚠️ SMS server offline — run: node sms-server.js</div>';
+  }
+}
+
+// ── SMS Log ────────────────────────────────────────────────────
+async function refreshSMSLog() {
+  try {
+    const r = await fetch(SMS_API+'/sms/log');
+    const d = await r.json();
+    const body = document.getElementById('sms-log-body');
+    if(!d.log||d.log.length===0){body.innerHTML='<div style="padding:40px;text-align:center;color:var(--muted)"><div style="font-size:40px;margin-bottom:8px">💬</div><div style="font-weight:700">No messages yet</div></div>';return;}
+    body.innerHTML = `<table><thead><tr><th>Direction</th><th>To/From</th><th>Message</th><th>Status</th><th>Time</th></tr></thead><tbody>${
+      d.log.map(m=>`<tr>
+        <td>${m.direction==='inbound'?'📩 Inbound':'📤 Outbound'}</td>
+        <td style="font-family:monospace;font-size:12px">${m.to||m.from||'—'}</td>
+        <td style="max-width:300px;white-space:normal;line-height:1.4">${(m.body||'').substring(0,120)}${(m.body||'').length>120?'…':''}</td>
+        <td><span class="sms-status-badge ss-${m.status||'demo'}">${m.status||'demo'}</span></td>
+        <td>${m.sentAt||m.receivedAt?new Date(m.sentAt||m.receivedAt).toLocaleTimeString('en-IE'):''}</td>
+      </tr>`).join('')
+    }</tbody></table>`;
+
+    // Update SMS stats
+    const today = new Date().toDateString();
+    const todaySMS = d.log.filter(m=>new Date(m.sentAt||m.receivedAt).toDateString()===today&&m.direction!=='inbound');
+    document.getElementById('stat-sms').textContent = todaySMS.length;
+    document.getElementById('m-sms').textContent = d.log.filter(m=>m.direction!=='inbound').length;
+    document.getElementById('m-replies').textContent = d.log.filter(m=>m.direction==='inbound').length;
+  } catch(e) {
+    document.getElementById('sms-log-body').innerHTML = '<div style="padding:24px;text-align:center;color:var(--muted)">⚠️ SMS server offline — run: <code>node sms-server.js</code></div>';
+  }
+}
+
+// ── Config save ────────────────────────────────────────────────
+async function saveConfig() {
+  const body = {
+    sid:   document.getElementById('cfg-sid').value.trim(),
+    token: document.getElementById('cfg-token').value.trim(),
+    from:  document.getElementById('cfg-from').value.trim(),
+    companyPhone: document.getElementById('cfg-phone').value.trim(),
+  };
+  try {
+    const r = await fetch(SMS_API+'/config', {method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)});
+    const d = await r.json();
+    checkServerMode();
+    alert(d.mode==='live' ? '✅ Twilio connected! SMS will now be sent live.' : '⚠️ Saved but Twilio not connected — check your credentials.');
+  } catch(e) { alert('⚠️ Could not connect to SMS server. Make sure sms-server.js is running.'); }
+}
+
+// ── Test SMS ───────────────────────────────────────────────────
+async function sendTestSMS() {
+  const to = prompt('Send test SMS to (Irish number e.g. +353871234567):');
+  if(!to) return;
+  try {
+    await fetch(SMS_API+'/sms/send', {
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({to, body:`⚔️ Test message from Rollo Heating & Plumbing. Your SMS system is working! Job management by Rollo.`})
+    });
+    alert('✅ Test SMS queued! Check the SMS Log tab.');
+    if(currentTab==='sms') refreshSMSLog();
+  } catch(e) { alert('⚠️ SMS server offline.'); }
+}
+
+// ── Modal ──────────────────────────────────────────────────────
+function openModal(id, jobNum, custName, cap) {
+  currentClaimId = id;
+  document.getElementById('modal-claim-info').innerHTML = `
+    <strong>Job #${jobNum}</strong> — ${custName}<br/>
+    Maximum compensation: <strong>€${cap}</strong><br/>
+    <br/>Before approving, check:<br/>
+    • Was the customer home and accessible?<br/>
+    • Was there a weather warning or traffic incident?<br/>
+    • Did the engineer attempt to contact the customer?<br/>
+    • Has this customer claimed in the last 12 months?`;
+  document.getElementById('modal-notes').value = '';
+  document.getElementById('resolve-modal').classList.add('open');
+}
+function closeModal() { document.getElementById('resolve-modal').classList.remove('open'); }
+async function resolveClaim(resolution) {
+  const notes = document.getElementById('modal-notes').value;
+  try {
+    await fetch(SMS_API+'/guarantee/resolve', {
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({claimId:currentClaimId, resolution, notes})
+    });
+    closeModal();
+    refreshClaims();
+  } catch(e) { alert('Error resolving claim.'); }
+}
+
+// ── Copy T&Cs ──────────────────────────────────────────────────
+function copyTC() {
+  const text = document.getElementById('tc-text').innerText;
+  navigator.clipboard.writeText(text).then(()=>alert('T&Cs copied to clipboard!')).catch(()=>{});
+}
+
+// ── Jobs stats ─────────────────────────────────────────────────
+function loadJobStats() {
+  try {
+    const jobs = JSON.parse(localStorage.getItem('ros_jobs')||'[]');
+    const done = jobs.filter(j=>j.status==='Completed'||j.status==='Invoiced').length;
+    document.getElementById('m-completed').textContent = done;
+  } catch(e){}
+}
+
+// ── Init ───────────────────────────────────────────────────────
+showTab('claims');
+loadJobStats();
+checkServerMode();
+setInterval(checkServerMode, 10000);
+</script>
+</body>
+</html>
